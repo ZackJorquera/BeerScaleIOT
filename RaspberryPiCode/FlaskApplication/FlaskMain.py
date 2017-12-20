@@ -10,12 +10,16 @@ def start():
 
 @app.route('/Home')
 def home():
-    return 'This is the homepage'
+    return render_template("HomePage.html")
 
 
 @app.route('/KegInfo=<int:num>')
 def getKeg(num):
-    return render_template("KegInfo.html",num=num)
+    type = "type1"
+    name = "Primary Keg"
+    capacity = 5
+    errors = 0
+    return render_template("KegInfo.html",num=num, type=type, name=name, capacity=capacity, errors=errors)
 
 
 @app.route('/ProgramInfo')
