@@ -6,9 +6,10 @@
 </head>
 <body>
     <h1>Keg {{ num }}</h1>
+    <p><a href="/KegInfo={{ num }}">Update</a></p>
     <p><b>Type:</b> {{ type }}</p>
     <p><b>Name:</b> {{ name }}</p>
-    <p><b>Max Capacity:</b> {{ capacity }} gal</p>
-    <p><b>Errors reported:</b> {{ errors }}</p>
+    <p><b>Max Capacity:</b> {{ capacity }} {{ unit }}</p>
+    <p><b>Present Full:</b> {{ value }} %</p>
 </body>
 </html>

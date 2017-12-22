@@ -1,5 +1,7 @@
 from flask import Flask, render_template, redirect, url_for
 
+import KegInfoReaderWriter as KegIRW
+
 app = Flask(__name__)
 
 
@@ -10,16 +12,14 @@ def start():
 
 @app.route('/Home')
 def home():
-    return render_template("HomePage.html")
+    numOfKegs = KegIRW.GetNumOfKegs()
+    return render_template("HomePage.html", num=numOfKegs)
 
 
 @app.route('/KegInfo=<int:num>')
 def getKeg(num):
-    type = "type1"
-    name = "Primary Keg"
-    capacity = 5
-    errors = 0
-    return render_template("KegInfo.html",num=num, type=type, name=name, capacity=capacity, errors=errors)
+    ki = KegIRW.KegInfo(num)
+    return render_template("KegInfo.html", num=num, type=ki.Type, name=ki.Name, capacity=ki.MaxCapacity, unit=ki.Units, value=ki.Value)
 
 
 @app.route('/ProgramInfo')
