@@ -13,8 +13,9 @@
         <li><a href="#">Set up a scale.</a></li>
         <li>There are {{ num }} kegs programmed in. Click to view keg data for:</li>
         <ul>
-            <li><a href="/KegInfo=1">Scale 1</a></li>
-            <li><a href="/KegInfo=2">Scale 2</a></li>
+            {% for i in range(1,num+1) %}
+                <li><a href="/KegInfo={{ i }}">Scale {{ i }}</a></li>
+            {% endfor %}
         </ul>
     </ul>
 

@@ -9,11 +9,11 @@ class KegInfo:
         self.Units = ""
         self.Value = 0.0
 
-        if num <= GetNumOfKegs():
-            self.GetDataForKeg(num)
+        if num <= GetNumOfScales():
+            self.GetDataForScale(num)
 
 
-    def GetDataForKeg(self, kegNum):
+    def GetDataForScale(self, kegNum):
         kegInfoFile = open("KegInfoFile", "r")
 
         line = kegInfoFile.readline()
@@ -43,7 +43,7 @@ class KegInfo:
         self.Value = 43.24 #will read from the pins using GPIO
 
 
-def GetNumOfKegs():
+def GetNumOfScales():
     kegInfoFile = open("KegInfoFile", "r")
     fl = kegInfoFile.readline()
     kegInfoFile.close()

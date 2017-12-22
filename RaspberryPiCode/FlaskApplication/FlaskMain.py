@@ -14,7 +14,7 @@ def start():
 
 @app.route('/Home')
 def home():
-    numOfKegs = KegIRW.GetNumOfKegs()
+    numOfKegs = KegIRW.GetNumOfScales()
     return render_template("HomePage.html", num=numOfKegs)
 
 
