@@ -21,17 +21,17 @@ class KegInfo:
             line = kegInfoFile.readline()
 
         line = kegInfoFile.readline()
-        self.Type = line.split(":")[1]
+        self.Type = line.split(":")[1].strip()
         line = kegInfoFile.readline()
-        self.Name = line.split(":")[1]
+        self.Name = line.split(":")[1].strip()
         line = kegInfoFile.readline()
-        self.MaxCapacity = line.split(":")[1]
+        self.MaxCapacity = line.split(":")[1].strip()
         line = kegInfoFile.readline()
-        self.Units = line.split(":")[1]
+        self.Units = line.split(":")[1].strip()
         line = kegInfoFile.readline()
-        dataPin = line.split(":")[1]
+        dataPin = int(line.split(":")[1].strip())
         line = kegInfoFile.readline()
-        clockPin = line.split(":")[1]
+        clockPin = int(line.split(":")[1].strip())
 
         self.ReadFromPin(dataPin, clockPin)
 
