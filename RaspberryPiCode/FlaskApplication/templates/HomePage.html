@@ -11,10 +11,10 @@
     <p>You can:</p>
     <ul>
         <li><a href="#">Set up a scale.</a></li>
-        <li>There are {{ num }} kegs programmed in. Click to view keg data for:</li>
+        <li>There are {{ num }} scales programmed in. Click to view scale data for:</li>
         <ul>
             {% for i in range(1,num+1) %}
-                <li><a href="/KegInfo={{ i }}">Scale {{ i }}</a></li>
+                <li><a href="/ScaleInfo={{ i }}">Scale {{ i }}</a></li>
             {% endfor %}
         </ul>
     </ul>

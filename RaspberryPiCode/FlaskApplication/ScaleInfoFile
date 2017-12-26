@@ -1,6 +1,6 @@
-Total Kegs:2
+Total Scales:2
 
-Keg 1
+Scale 1
 Type:Example
 Name:Example Name
 Max Capacity:5.3
@@ -8,7 +8,7 @@ Units:gals
 Data Pin:3
 Clock Pin:6
 
-Keg 2
+Scale 2
 Type:Example2
 Name:Example2 Name
 Max Capacity:5.3

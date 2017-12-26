@@ -2,7 +2,7 @@
 
 from flask import Flask, render_template, redirect, url_for
 
-import KegInfoReaderWriter as KegIRW
+import ScaleInfoReaderWriter as ScaleIRW
 
 app = Flask(__name__)
 
@@ -14,14 +14,14 @@ def start():
 
 @app.route('/Home')
 def home():
-    numOfKegs = KegIRW.GetNumOfScales()
-    return render_template("HomePage.html", num=numOfKegs)
+    numOfScales = ScaleIRW.GetNumOfScales()
+    return render_template("HomePage.html", num=numOfScales)
 
 
-@app.route('/KegInfo=<int:num>')
-def getKeg(num):
-    ki = KegIRW.KegInfo(num)
-    return render_template("KegInfo.html", num=num, type=ki.Type, name=ki.Name, capacity=ki.MaxCapacity, unit=ki.Units, value=ki.Value)
+@app.route('/ScaleInfo=<int:num>')
+def getScale(num):
+    ki = ScaleIRW.ScaleInfo(num)
+    return render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name, capacity=ki.MaxCapacity, unit=ki.Units, value=ki.Value)
 
 
 @app.route('/ProgramInfo')
