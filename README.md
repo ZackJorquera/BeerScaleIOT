@@ -1,4 +1,4 @@
-# What is the BeerScaleIOT
+# What is the ScaleLiquidRemainingIOT
 The BeerScaleIOT is an internet of things device that is used to collect data from scales collecting weight data of kegs to know the percentage of how full they are.
 
 More information later
