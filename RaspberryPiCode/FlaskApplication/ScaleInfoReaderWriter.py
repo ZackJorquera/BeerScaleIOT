@@ -74,3 +74,59 @@ def GetNumOfScales():
         return int((fl.split(":")[1]).strip())
     else:
         return 0
+
+
+def AddScaleInfoToFile(type, name, max, units, dataPin, clockPin):
+    numScales = GetNumOfScales()
+
+    fr = open(infoFilePath, "r")
+    data = fr.readlines()
+    fr.close()
+
+    fw = open(infoFilePath, "w")
+    fw.write("Total Scales:" + str(numScales + 1) + "\n\n")
+
+    line = 0
+    for i in range(0, numScales):
+        while data[line] != "Scale " + str(i + 1) + "\n":
+            line += 1
+        fw.writelines(data[line:line+7])
+        fw.write("\n")
+
+    fw.write("Scale " + str(numScales + 1) + "\n")
+    fw.write("Type:" + type + "\n")
+    fw.write("Name:" + name + "\n")
+    fw.write("Max Capacity:" + max + "\n")
+    fw.write("Units:" + units + "\n")
+    fw.write("Data Pin:" + dataPin + "\n")
+    fw.write("Clock Pin:" + clockPin + "\n")
+
+    fw.close()
+
+    return (numScales + 1)
+
+
+def DeleteScaleInfo(num):
+    numScales = GetNumOfScales()
+
+    fr = open(infoFilePath, "r")
+    data = fr.readlines()
+    fr.close()
+
+    fw = open(infoFilePath, "w")
+    fw.write("Total Scales:" + str(numScales - 1) + "\n\n")
+
+    line = 0
+    offset = 1
+    for i in range(0, numScales):
+        if i + 1 == num:
+            offset -= 1
+            continue
+        while data[line] != "Scale " + str(i + 1) + "\n":
+            line += 1
+        line += 1
+        fw.write("Scale " + str(i + offset) + "\n")
+        fw.writelines(data[line:line + 6])
+        fw.write("\n")
+
+    fw.close()
