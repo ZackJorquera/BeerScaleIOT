@@ -1,18 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
 <head>
-    <meta charset="UTF-8">
-    <title>Add New Scale</title>
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+	<title>Add a Scale</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <form method="POST">
-        <p>Type: <input name="Type"></p>
-        <p>Name: <input name="Name"></p>
-        <p>Max Capacity: <input name="MaxCapacity"></p>
-        <p>Units: <input name="Units"></p>
-        <p>Data Pin: <input name="DataPin"></p>
-        <p>Clock Pin: <input name="ClockPin"></p>
-        <input type="submit">
-    </form>
+<div id="container">
+	<div id="intro">
+		<div id="pageHeaderTwo">
+			<h1><span>Add a Scale</span></h1>
+		</div>
+
+		<div id="preamble">
+            <form method="POST">
+                <h2><span>Scale Info</span></h2>
+                <p> Type: <input name="Type"><br />
+                    Name: <input name="Name"><br />
+                    Max Capacity: <input name="MaxCapacity"><br />
+                    Units: <input name="Units"><br />
+                    Data Pin: <input name="DataPin"><br />
+                    Clock Pin: <input name="ClockPin"></p>
+                <input type="submit">
+            </form>
+		</div>
+	</div>
+
+	<div id="linkList">
+		<div id="linkList2">
+			<div id="lselect">
+				<ul>
+					<li><a href="/Home">Home</a></li>
+					<li><a href="">Contact</a></li>
+					<li><a href="https://github.com/ZackJorquera/ScaleLiquidRemainingIOT">GitHub</a></li>
+				</ul>
+			</div>
+
+			<div id="larchives">
+				<ul>
+					<li><a href="/AddScale">Add a Scale</a></li>
+					{% for i in range(1,num+1) %}
+                        <li><a href="/ScaleInfo={{ i }}">Scale {{ i }}</a></li>
+                    {% endfor %}
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
 </body>
 </html>

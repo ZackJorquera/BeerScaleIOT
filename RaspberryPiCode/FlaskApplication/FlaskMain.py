@@ -21,7 +21,8 @@ def home():
 @app.route('/ScaleInfo=<int:num>')
 def getScale(num):
     ki = ScaleIRW.ScaleInfo(num)
-    return render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name, capacity=ki.MaxCapacity, unit=ki.Units, value=ki.Value)
+    totalScales = ScaleIRW.GetNumOfScales()
+    return render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name, capacity=ki.MaxCapacity, unit=ki.Units, value=ki.Value, totalNum=totalScales)
 
 
 @app.route('/ScaleInfo=<int:num>', methods=['POST'])
@@ -32,7 +33,8 @@ def getScalePost(num):
 
 @app.route('/AddScale')
 def addScale():
-    return render_template("AddScale.html")
+    num = ScaleIRW.GetNumOfScales()
+    return render_template("AddScale.html", num=num)
 
 
 @app.route('/AddScale', methods=['POST'])
