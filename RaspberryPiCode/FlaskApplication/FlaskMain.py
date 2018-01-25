@@ -2,6 +2,8 @@
 
 from flask import Flask, render_template, redirect, url_for, request
 
+import sys
+sys.path.append('../Tools/')
 import ScaleInfoReaderWriter as ScaleIRW
 
 app = Flask(__name__)
@@ -22,12 +24,13 @@ def home():
 def getScale(num):
     ki = ScaleIRW.ScaleInfo(num)
     totalScales = ScaleIRW.GetNumOfScales()
-    return render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name, capacity=ki.MaxCapacity, unit=ki.Units, value=ki.Value, totalNum=totalScales)
+    return render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name, capacity=ki.MaxCapacity, unit=ki.Units, value=ki.GetValue(), totalNum=totalScales)
 
 
 @app.route('/ScaleInfo=<int:num>', methods=['POST'])
 def getScalePost(num):
-    ScaleIRW.DeleteScaleInfo(num)
+    ki = ScaleIRW.ScaleInfo(num)
+    ki.Delete()
     return redirect(url_for('home'))
 
 

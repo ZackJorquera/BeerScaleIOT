@@ -1,6 +1,7 @@
-#import RPi.GPIO as GPIO
+import uuid
 
-infoFilePath = "ScaleInfoFile"
+
+infoFilePath = "../ScaleInfoFile" # the file directory is still where FlaskMain is and not at this programs file location
 
 class ScaleInfo:
     # scaleInfo is a class used to store the information for each scale.
@@ -9,15 +10,18 @@ class ScaleInfo:
     def __init__(self, num):
         self.Type = "Not Programmed"
         self.Name = "Not Programmed"
+        self.UUID = uuid.uuid1() # this is so each scale have a unique id for the database
         self.MaxCapacity = 0.0
         self.Units = ""
-        self.Value = 0.0
+        self.DataPin = 0
+        self.ClockPin = 0
+        self.Num = num
 
         if num <= GetNumOfScales():
-            self.__GetDataForScale(num)
+            self.__GetDataForScale()
 
 
-    def __GetDataForScale(self, scaleNum):
+    def __GetDataForScale(self):
         # This private method is used to get all of the information for a programmed scale.
         # The information for each programmed scale is stored in the file scaleInfoFile.
         try:
@@ -26,7 +30,7 @@ class ScaleInfo:
             scaleInfoFile = self.__CreateNewInfoFile(infoFilePath)
 
         line = scaleInfoFile.readline()
-        while line != "Scale " + str(scaleNum) + "\n":
+        while line != "Scale " + str(self.Num) + "\n":
             line = scaleInfoFile.readline()
 
         line = scaleInfoFile.readline()
@@ -34,30 +38,61 @@ class ScaleInfo:
         line = scaleInfoFile.readline()
         self.Name = line.split(":")[1].strip()
         line = scaleInfoFile.readline()
+        self.UUID = line.split(":")[1].strip()
+        line = scaleInfoFile.readline()
         self.MaxCapacity = line.split(":")[1].strip()
         line = scaleInfoFile.readline()
         self.Units = line.split(":")[1].strip()
         line = scaleInfoFile.readline()
-        dataPin = int(line.split(":")[1].strip())
+        self.DataPin = int(line.split(":")[1].strip())
         line = scaleInfoFile.readline()
-        clockPin = int(line.split(":")[1].strip())
-
-        self.__ReadFromPin(dataPin, clockPin)
+        self.ClockPin = int(line.split(":")[1].strip())
 
         scaleInfoFile.close()
 
 
+    def GetValue(self):
+        pv = self.__ReadFromPin(self.DataPin, self.ClockPin)
+        v = pv
+        return v
+
     def __ReadFromPin(self, dataPin, clockPin):
-        self.Value = 43.24 #will read from the pins using GPIO
+        return 43.24 #will read from the pins using GPIO
 
 
     def __CreateNewInfoFile(self, filePath):
-        # Create a new InfoFile with not scales programmed in it
-        # The reason that this file is reopened after it is created is because we only to return the readonly mode of the file.
+        # Create a new InfoFile with no scales programmed into it
+        # The reason that this file is reopened after it is created is because we only want to return the readonly mode of the file.
         f = open(filePath, "w+")
         f.write("Total scales:0")
         f.close()
         return open(filePath, "r")
+
+
+    def Delete(self):
+        numScales = GetNumOfScales()
+
+        fr = open(infoFilePath, "r")
+        data = fr.readlines()
+        fr.close()
+
+        fw = open(infoFilePath, "w")
+        fw.write("Total Scales:" + str(numScales - 1) + "\n\n")
+
+        line = 0
+        offset = 1
+        for i in range(0, numScales):
+            if i + 1 == self.Num:
+                offset -= 1
+                continue
+            while data[line] != "Scale " + str(i + 1) + "\n":
+                line += 1
+            line += 1
+            fw.write("Scale " + str(i + offset) + "\n")
+            fw.writelines(data[line:line + 7])
+            fw.write("\n")
+
+        fw.close()
 
 
 def GetNumOfScales():
@@ -90,12 +125,13 @@ def AddScaleInfoToFile(type, name, max, units, dataPin, clockPin):
     for i in range(0, numScales):
         while data[line] != "Scale " + str(i + 1) + "\n":
             line += 1
-        fw.writelines(data[line:line+7])
+        fw.writelines(data[line:line+8])
         fw.write("\n")
 
     fw.write("Scale " + str(numScales + 1) + "\n")
     fw.write("Type:" + type + "\n")
     fw.write("Name:" + name + "\n")
+    fw.write("UUID:" + str(uuid.uuid1()) + "\n")
     fw.write("Max Capacity:" + max + "\n")
     fw.write("Units:" + units + "\n")
     fw.write("Data Pin:" + dataPin + "\n")
@@ -104,29 +140,3 @@ def AddScaleInfoToFile(type, name, max, units, dataPin, clockPin):
     fw.close()
 
     return (numScales + 1)
-
-
-def DeleteScaleInfo(num):
-    numScales = GetNumOfScales()
-
-    fr = open(infoFilePath, "r")
-    data = fr.readlines()
-    fr.close()
-
-    fw = open(infoFilePath, "w")
-    fw.write("Total Scales:" + str(numScales - 1) + "\n\n")
-
-    line = 0
-    offset = 1
-    for i in range(0, numScales):
-        if i + 1 == num:
-            offset -= 1
-            continue
-        while data[line] != "Scale " + str(i + 1) + "\n":
-            line += 1
-        line += 1
-        fw.write("Scale " + str(i + offset) + "\n")
-        fw.writelines(data[line:line + 6])
-        fw.write("\n")
-
-    fw.close()
