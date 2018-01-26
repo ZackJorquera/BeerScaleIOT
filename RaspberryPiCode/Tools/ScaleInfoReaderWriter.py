@@ -1,6 +1,9 @@
 import uuid
+import time
+import math
 
 
+simulateData = True
 infoFilePath = "../ScaleInfoFile" # the file directory is still where FlaskMain is and not at this programs file location
 
 class ScaleInfo:
@@ -57,7 +60,10 @@ class ScaleInfo:
         return v
 
     def __ReadFromPin(self, dataPin, clockPin):
-        return 43.24 #will read from the pins using GPIO
+        if simulateData:
+            return (math.sin(math.pi * (time.time() - 1516000000)/200 + self.Num)*50 + 50)
+        else:
+            return 43.24 #will read from the pins using GPIO
 
 
     def __CreateNewInfoFile(self, filePath):

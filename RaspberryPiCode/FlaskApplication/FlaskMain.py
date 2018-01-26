@@ -2,9 +2,25 @@
 
 from flask import Flask, render_template, redirect, url_for, request
 
+import matplotlib.pyplot as plt
+
+import io
+import base64
+
 import sys
 sys.path.append('../Tools/')
 import ScaleInfoReaderWriter as ScaleIRW
+import MongoReaderWriter as MongoRW
+import MongoReaderWriter as MongoRW
+import MySQLReaderWriter as MySQLRW
+
+
+dbToUse = "mongo" # TODO: From Config
+
+if dbToUse == "mongo": # use a switch
+    ScaleDataDB = MongoRW.MongoDBProfile()
+else:
+    ScaleDataDB = MySQLRW.MySQLDBProfile()
 
 app = Flask(__name__)
 
@@ -24,7 +40,25 @@ def home():
 def getScale(num):
     ki = ScaleIRW.ScaleInfo(num)
     totalScales = ScaleIRW.GetNumOfScales()
-    return render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name, capacity=ki.MaxCapacity, unit=ki.Units, value=ki.GetValue(), totalNum=totalScales)
+
+    img = io.BytesIO()
+
+    timeFrameData = ScaleDataDB.GetTimeFrameFor(ki, 628)
+
+    y = timeFrameData['valueList']
+    x = timeFrameData['timeStampList']
+
+    plt.clf()
+    plt.plot(x, y, '-bo')
+    plt.suptitle('History Graph')
+    plt.xlabel('Seconds Ago')
+    plt.ylabel('Present Full')
+    plt.savefig(img, format='png')
+    img.seek(0)
+
+    plot_url = base64.b64encode(img.getvalue()).decode()
+
+    return render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name, capacity=ki.MaxCapacity, unit=ki.Units, value=ki.GetValue(), totalNum=totalScales, plot_url=plot_url)
 
 
 @app.route('/ScaleInfo=<int:num>', methods=['POST'])

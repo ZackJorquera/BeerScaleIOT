@@ -62,7 +62,7 @@ class MongoDBProfile:
         valueList = list()
 
         for item in cursor:
-            timeStampList.append(item['t'])
+            timeStampList.append(item['t'] - time.time())
             valueList.append(item['v'])
 
         timeFrameData = {'valueList': valueList, 'timeStampList': timeStampList}
