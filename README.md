@@ -20,6 +20,7 @@ With a quick removal of the bloat ware that comes with the PI, everything should
 Make sure that Flask is installed on the Pi.
 ```
 sudo apt-get install flask
+sudo apt-get install python3-matplotlib
 ```
 Download the RaspberryPiCode/FlaskApplication folder to the Pi. 
 To start the FlaskMain.py script has to be run within the RaspberryPiCode/FlaskApplication folder.
