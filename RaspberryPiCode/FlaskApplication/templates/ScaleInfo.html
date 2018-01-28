@@ -2,9 +2,13 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+	<meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<title>Scale Info {{ num }}</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+	{{ js_resources|indent(4)|safe }}
+    {{ css_resources|indent(4)|safe }}
+    {{ plot_script|indent(4)|safe }}
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <div id="container">
@@ -19,7 +23,7 @@
                 <b>Name:</b> {{ name }}<br />
                 <b>Max Capacity:</b> {{ capacity }} {{ unit }}<br />
                 <b>Present Full:</b> {{ value }} %<br /></p>
-				<img src="data:image/png;base64, {{ plot_url }}">
+				{{ plot_div|indent(4)|safe }}
             <p><form method="POST"><input type="submit" value="Delete" /></form></p>
 		</div>
 	</div>

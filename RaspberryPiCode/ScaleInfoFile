@@ -1,4 +1,4 @@
-Total Scales:2
+Total Scales:3
 
 Scale 1
 Type:Example
@@ -16,5 +16,14 @@ UUID:1a06714f-0188-11e8-9f5d-fcaa147d9c11
 Max Capacity:5.3
 Units:gals
 Data Pin:3
+Clock Pin:1
+
+Scale 3
+Type:1
+Name:1
+UUID:f1ce1e4f-0442-11e8-b8f4-fcaa147d9c11
+Max Capacity:1
+Units:1
+Data Pin:1
 Clock Pin:1
 

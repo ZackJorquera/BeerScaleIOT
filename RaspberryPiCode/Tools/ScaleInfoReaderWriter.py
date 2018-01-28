@@ -55,13 +55,17 @@ class ScaleInfo:
 
 
     def GetValue(self):
-        pv = self.__ReadFromPin(self.DataPin, self.ClockPin)
-        v = pv
+        if self.Name != "Not Programmed":
+            pv = self.__ReadFromPin(self.DataPin, self.ClockPin)
+            v = pv
+        else:
+            v = "NA"
         return v
 
     def __ReadFromPin(self, dataPin, clockPin):
         if simulateData:
-            return (math.sin(math.pi * (time.time() - 1516000000)/200 + self.Num)*50 + 50)
+            return (math.sin(3 * math.pi * (time.time() - 1516000000)/200 + self.Num)*(50/2) +
+                    math.sin(2 * math.pi * (time.time() - 1516000000)/200 + self.Num)*(50/2) + 50)
         else:
             return 43.24 #will read from the pins using GPIO
 

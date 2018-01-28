@@ -2,15 +2,15 @@
 
 from flask import Flask, render_template, redirect, url_for, request
 
-import matplotlib.pyplot as plt
-
-import io
-import base64
+from bokeh.embed import components
+from bokeh.plotting import figure
+from bokeh.resources import INLINE
+from bokeh.util.string import encode_utf8
+from bokeh.models import Range1d, HoverTool, WheelZoomTool, SaveTool, PanTool, ResetTool
 
 import sys
 sys.path.append('../Tools/')
 import ScaleInfoReaderWriter as ScaleIRW
-import MongoReaderWriter as MongoRW
 import MongoReaderWriter as MongoRW
 import MySQLReaderWriter as MySQLRW
 
@@ -41,24 +41,61 @@ def getScale(num):
     ki = ScaleIRW.ScaleInfo(num)
     totalScales = ScaleIRW.GetNumOfScales()
 
-    img = io.BytesIO()
+    # Graph Colors
+    lineColors = ["#ffa500", "#00ff00", "#fbfbf1"]
+    dotColors = ["#cc8400", "#00e500", "#e1e1d8"]
 
-    timeFrameData = ScaleDataDB.GetTimeFrameFor(ki, 628)
+    # Get the data
+    timeFrameData = ScaleDataDB.GetTimeFrameFor(ki, 1000)
 
     y = timeFrameData['valueList']
     x = timeFrameData['timeStampList']
 
-    plt.clf()
-    plt.plot(x, y, '-bo')
-    plt.suptitle('History Graph')
-    plt.xlabel('Seconds Ago')
-    plt.ylabel('Present Full')
-    plt.savefig(img, format='png')
-    img.seek(0)
+    # Create the tools
+    hover = HoverTool(tooltips=
+    [
+        ("Secs Ago", "@x"),
+        ("Value", "@y")
+    ])
+    save = SaveTool()
+    wheel_zoom = WheelZoomTool()
+    pan = PanTool()
+    reset = ResetTool()
 
-    plot_url = base64.b64encode(img.getvalue()).decode()
+    fig = figure(title="History Graph", plot_width=600, plot_height=600, tools=[wheel_zoom, save, hover, pan, reset])
+    fig.yaxis[0].axis_label = 'Present Full'
+    fig.xaxis[0].axis_label = 'Seconds Ago'
 
-    return render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name, capacity=ki.MaxCapacity, unit=ki.Units, value=ki.GetValue(), totalNum=totalScales, plot_url=plot_url)
+    #Set Range
+    fig.x_range = Range1d(-1050, 25)
+    fig.y_range = Range1d(-5, 110)
+
+    # Set Colors
+    fig.border_fill_color = "#101010"
+    fig.background_fill_color = "#333333"
+    fig.xgrid.grid_line_color = "#545454"
+    fig.ygrid.grid_line_color = "#545454"
+    fig.title.text_color = "#A8A8A8"
+    fig.yaxis.axis_label_text_color = "#A8A8A8"
+    fig.xaxis.axis_label_text_color = "#A8A8A8"
+
+    # Pot the Graph
+    fig.line(x, y, line_width=3, line_color=lineColors[(num - 1) % len(lineColors)])
+    fig.circle(x, y, size=10, color=dotColors[(num - 1) % len(dotColors)], alpha=0.7)
+
+    # grab the static resources
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    # render template
+    script, div = components(fig)
+
+    html = render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name,
+                           capacity=ki.MaxCapacity, unit=ki.Units, value=ki.GetValue(),
+                           totalNum=totalScales, plot_script=script, plot_div=div,
+                           js_resources=js_resources, css_resources=css_resources)
+
+    return encode_utf8(html)
 
 
 @app.route('/ScaleInfo=<int:num>', methods=['POST'])
