@@ -39,10 +39,10 @@
 
 			<div id="larchives">
 				<ul>
-					<li><a href="/AddScale">Add a Scale</a></li>
 					{% for i in range(1,num+1) %}
                         <li><a href="/ScaleInfo={{ i }}">Scale {{ i }}</a></li>
                     {% endfor %}
+					<li><a href="/AddScale">Add a Scale</a></li>
 				</ul>
 			</div>
 		</div>

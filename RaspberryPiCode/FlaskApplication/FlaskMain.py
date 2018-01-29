@@ -1,12 +1,15 @@
 #!/usr/bin/python
 
+import math
+
 from flask import Flask, render_template, redirect, url_for, request
 
 from bokeh.embed import components
 from bokeh.plotting import figure
 from bokeh.resources import INLINE
 from bokeh.util.string import encode_utf8
-from bokeh.models import Range1d, HoverTool, WheelZoomTool, SaveTool, PanTool, ResetTool
+from bokeh.models import Range1d, HoverTool, WheelZoomTool, SaveTool, PanTool, ResetTool, Plot, Label
+from bokeh.models.glyphs import AnnularWedge
 
 import sys
 sys.path.append('../Tools/')
@@ -46,7 +49,7 @@ def getScale(num):
     dotColors = ["#cc8400", "#00e500", "#e1e1d8"]
 
     # Get the data
-    timeFrameData = ScaleDataDB.GetTimeFrameFor(ki, 1000)
+    timeFrameData = ScaleDataDB.GetTimeFrameFor(ki, 960)
 
     y = timeFrameData['valueList']
     x = timeFrameData['timeStampList']
@@ -58,16 +61,18 @@ def getScale(num):
         ("Value", "@y")
     ])
     save = SaveTool()
-    wheel_zoom = WheelZoomTool()
-    pan = PanTool()
+    #wheel_zoom = WheelZoomTool()
+    #pan = PanTool()
     reset = ResetTool()
 
-    fig = figure(title="History Graph", plot_width=600, plot_height=600, tools=[wheel_zoom, save, hover, pan, reset])
+    fig = figure(title="History Graph", plot_width=600, plot_height=600, tools=[save, hover, reset])
     fig.yaxis[0].axis_label = 'Present Full'
-    fig.xaxis[0].axis_label = 'Seconds Ago'
+    fig.xaxis[0].axis_label = 'Mins Ago'
+
+    fig.toolbar_location = None
 
     #Set Range
-    fig.x_range = Range1d(-1050, 25)
+    fig.x_range = Range1d(-16, 1)
     fig.y_range = Range1d(-5, 110)
 
     # Set Colors
@@ -75,9 +80,9 @@ def getScale(num):
     fig.background_fill_color = "#333333"
     fig.xgrid.grid_line_color = "#545454"
     fig.ygrid.grid_line_color = "#545454"
-    fig.title.text_color = "#A8A8A8"
-    fig.yaxis.axis_label_text_color = "#A8A8A8"
-    fig.xaxis.axis_label_text_color = "#A8A8A8"
+    fig.title.text_color = "white"
+    fig.yaxis.axis_label_text_color = "white"
+    fig.xaxis.axis_label_text_color = "white"
 
     # Pot the Graph
     fig.line(x, y, line_width=3, line_color=lineColors[(num - 1) % len(lineColors)])
@@ -124,9 +129,51 @@ def addScalePost():
     return redirect(url_for('getScale', num=num))
 
 
-@app.route('/ProgramInfo')
-def InfoPage():
-    return render_template("InfoPage.html")
+@app.route('/ScaleInfo2=<int:num>')
+def gauge(num):
+    ki = ScaleIRW.ScaleInfo(num)
+    totalScales = ScaleIRW.GetNumOfScales()
+    value = ki.GetValue()
+
+    colors = ["#ffa500", "#00ff00", "#fbfbf1"]
+
+    fig = Plot(x_range=Range1d(start=-1.25, end=1.25), y_range=Range1d(start=-1.25, end=1.25), plot_width=250, plot_height=250)
+    fig.title.text = "Present Full"
+    fig.title.align = 'center'
+    fig.toolbar_location = None
+
+    # Set Colors
+    fig.border_fill_color = "#101010"
+    fig.background_fill_color = "#101010"
+    fig.title.text_color = "white"
+    fig.outline_line_color = None
+
+    # source = ColumnDataSource(dict(x=0, y=0, r=1))
+    glyph = AnnularWedge(x=0, y=0, inner_radius=.7, outer_radius=1, start_angle=math.pi/2 - (2 * math.pi), end_angle=math.pi/2, fill_color="#444444")
+    glyph2 = AnnularWedge(x=0, y=0, inner_radius=.7, outer_radius=1, start_angle=math.pi/2 - (2 * math.pi * value/100), end_angle=math.pi/2, fill_color=colors[(num - 1) % len(colors)])
+    PercentageText = Label(text_align='center', text=str(round(value,1)))
+    PercentageText.text_color = 'white'
+    PercentageText.text_font_size = "35px"
+    lowerText = Label(text_align='center', y=-0.3, text='Present Full')
+    lowerText.text_color = 'white'
+    fig.add_glyph(glyph)
+    fig.add_glyph(glyph2)
+    fig.add_layout(PercentageText)
+    fig.add_layout(lowerText)
+
+
+    # render
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    script, div = components(fig)
+
+    html = render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name,
+                           capacity=ki.MaxCapacity, unit=ki.Units, value=value,
+                           totalNum=totalScales, plot_script=script, plot_div=div,
+                           js_resources=js_resources, css_resources=css_resources)
+
+    return encode_utf8(html)
 
 
 if __name__ == "__main__":

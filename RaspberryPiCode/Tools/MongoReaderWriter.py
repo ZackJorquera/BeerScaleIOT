@@ -15,7 +15,7 @@ class MongoDBProfile:
         def asBSON(self):
             return {"c": self.id, "v": self.Value, "t": self.TimeStamp}
 
-    def __init__(self, hostServer='localhost', hostPort=27017, dbName='ScaleLiquidRemainingIOT2', collectionName='ScaleData'):
+    def __init__(self, hostServer='localhost', hostPort=27017, dbName='ScaleLiquidRemainingIOT', collectionName='ScaleData'):
         self.HostServer = hostServer
         self.HostPort = hostPort
         self.DBName = dbName
@@ -62,7 +62,7 @@ class MongoDBProfile:
         valueList = list()
 
         for item in cursor:
-            timeStampList.append(item['t'] - time.time())
+            timeStampList.append((item['t'] - time.time())/60)
             valueList.append(item['v'])
 
         timeFrameData = {'valueList': valueList, 'timeStampList': timeStampList}
