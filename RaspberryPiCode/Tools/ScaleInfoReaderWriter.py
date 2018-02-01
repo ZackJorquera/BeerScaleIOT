@@ -43,7 +43,7 @@ class ScaleInfo:
         line = scaleInfoFile.readline()
         self.UUID = line.split(":")[1].strip()
         line = scaleInfoFile.readline()
-        self.MaxCapacity = line.split(":")[1].strip()
+        self.MaxCapacity = float(line.split(":")[1].strip())
         line = scaleInfoFile.readline()
         self.Units = line.split(":")[1].strip()
         line = scaleInfoFile.readline()
@@ -57,15 +57,15 @@ class ScaleInfo:
     def GetValue(self):
         if self.Name != "Not Programmed":
             pv = self.__ReadFromPin(self.DataPin, self.ClockPin)
-            v = pv
+            v = pv/100.0
         else:
-            v = "NA"
+            v = -1
         return v
 
     def __ReadFromPin(self, dataPin, clockPin):
         if simulateData:
-            return (math.sin(3 * math.pi * (time.time() - 1516000000)/200 + self.Num)*(50/2) +
-                    math.sin(2 * math.pi * (time.time() - 1516000000)/200 + self.Num)*(50/2) + 50)
+            return (math.sin(3 * math.pi * (time.time() - 1516000000) / 1000 + self.Num) * (50 / 2) +
+                    math.sin(2 * math.pi * (time.time() - 1516000000) / 1000 + self.Num) * (50 / 2) + 50)
         else:
             return 43.24 #will read from the pins using GPIO
 
@@ -150,3 +150,12 @@ def AddScaleInfoToFile(type, name, max, units, dataPin, clockPin):
     fw.close()
 
     return (numScales + 1)
+
+
+def GetListOfScaleInfos():
+    scaleInfoList = list()
+
+    for i in range(GetNumOfScales()):
+        scaleInfoList.append(ScaleInfo(i + 1))
+
+    return scaleInfoList
