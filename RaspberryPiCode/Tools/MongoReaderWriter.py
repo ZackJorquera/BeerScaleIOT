@@ -39,6 +39,11 @@ class MongoDBProfile:
             return False
 
 
+    def Reconnect(self):
+        if self.Connected != True:
+            self.Connected = self.__Connect()
+
+
     def Write(self, scaleInfo, value):
         dataSample = self.MongoDataSample(scaleInfo.UUID, value)
         result = self.Collection.insert_one(dataSample.asBSON())

@@ -1,4 +1,4 @@
-Total Scales:2
+Total Scales:3
 
 Scale 1
 Type:Example
@@ -18,3 +18,11 @@ Units:Liters
 Data Pin:3
 Clock Pin:1
 
+Scale 3
+Type:Test 3
+Name:test 3
+UUID:5e02bf61-087e-11e8-a1e1-fcaa147d9c11
+Max Capacity:58
+Units:Cups
+Data Pin:23
+Clock Pin:3

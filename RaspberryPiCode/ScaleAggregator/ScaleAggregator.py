@@ -5,12 +5,19 @@ import ScaleInfoReaderWriter as ScaleIRW
 import MongoReaderWriter as MongoRW
 import MySQLReaderWriter as MySQLRW
 
+
 dbToUse = "mongo" # TODO: From Config
 
-if dbToUse == "mongo": # use a switch
-    ScaleDataDB = MongoRW.MongoDBProfile()
-else:
-    ScaleDataDB = MySQLRW.MySQLDBProfile()
+
+def LoadDB():
+    if dbToUse == "mongo": # use a switch
+        db = MongoRW.MongoDBProfile()
+    else:
+        db = MySQLRW.MySQLDBProfile()
+    return db
+
+
+ScaleDataDB = LoadDB()
 
 scaleInfoList = None
 loopOn = 0
@@ -22,11 +29,28 @@ while True:
     if scaleInfoList == None or loopOn > 20 or len(scaleInfoList) != ScaleIRW.GetNumOfScales(): # TODO: get the 20 from Config
         scaleInfoList = ScaleIRW.GetListOfScaleInfos()
 
-    if ScaleDataDB != None:
-        for si in scaleInfoList:
-            ScaleDataDB.Write(si, (si.GetValue() * 100)) # There is a Write Function for both the MySQLRW and MongoRW classes
+    if ScaleDataDB.Connected == True:
+        successfulPushes = 0
+        failedPushes = 0
 
-    print str(len(scaleInfoList)) + " Documents added to database. Waiting " + str(secsPerParsist) + " seconds before next update"
+        for si in scaleInfoList:
+            try:
+                ScaleDataDB.Write(si, (si.GetValue() * 100)) # There is a Write Function for both the MySQLRW and MongoRW classes
+                successfulPushes += 1
+            except:
+                failedPushes += 1
+
+        print str(successfulPushes) + " documents successfully added to database" \
+              " with " + str(failedPushes) + " fails. " \
+              "Waiting " + str(secsPerParsist) + " seconds before next update."
+
+        if successfulPushes == 0 and len(scaleInfoList) != 0:
+            print "DB failed to push, attempting Reconnect."
+            ScaleDataDB.Reconnect()
+
+    else:
+        print "DB failed to connect, attempting Reconnect."
+        ScaleDataDB.Reconnect()
 
     while time.time() - timeOfLastUpdate < secsPerParsist:
         time.sleep(1)

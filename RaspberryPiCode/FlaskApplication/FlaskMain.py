@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import math
+import threading
 
 from flask import Flask, render_template, redirect, url_for, request
 
@@ -14,10 +15,27 @@ import BokehGraphCreater as GraphCreater
 
 dbToUse = "mongo" # TODO: From Config
 
-if dbToUse == "mongo": # use a switch
-    ScaleDataDB = MongoRW.MongoDBProfile()
-else:
-    ScaleDataDB = MySQLRW.MySQLDBProfile()
+
+ScaleDataDB = None
+reconnecting = False
+lock = threading.Lock()
+
+
+def LoadDB():
+    if dbToUse == "mongo": # use a switch
+        db = MongoRW.MongoDBProfile()
+    else:
+        db = MySQLRW.MySQLDBProfile()
+    return db
+
+
+def Reconnect():
+    lock.acquire()
+    ScaleDataDB.Reconnect()
+    lock.release()
+
+
+ScaleDataDB = LoadDB()
 
 app = Flask(__name__)
 
@@ -40,7 +58,18 @@ def getScale(num):
     value = ki.GetValue()
 
     # Get the data
-    timeFrameData = ScaleDataDB.GetTimeFrameFor(ki, 31)
+    dbNotWorking = False
+    try:
+        if ScaleDataDB.Connected == True:
+            timeFrameData = ScaleDataDB.GetTimeFrameFor(ki, 31)
+        else:
+            raise Exception('GetTimeFrameFor failed')
+    except:
+        dbNotWorking = True
+        timeFrameData = {'valueList': list(), 'timeStampList': list()}
+        t = threading.Thread(target=Reconnect)
+        t.start()
+
 
     y = timeFrameData['valueList']
     x = timeFrameData['timeStampList']
@@ -49,7 +78,7 @@ def getScale(num):
 
     # render template
     gfig = GraphCreater.CreateGauge(value, ki)
-    pfig = GraphCreater.CreatePlot(x,y, ki, time = 30, withDots = False)
+    pfig = GraphCreater.CreatePlot(x,y, ki, dbNotWorking, time = 30, withDots = False)
     script, div = GraphCreater.ConvertFigsToComponents('c', gfig, pfig)
 
     html = render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name,

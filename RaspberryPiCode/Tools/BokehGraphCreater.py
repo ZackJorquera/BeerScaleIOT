@@ -53,7 +53,7 @@ def ConvertFigsToComponents(alignment = 'c', *args, **kwargs):
     return components(allFigs)
 
 
-def CreatePlot(x, y, scaleInfo, time = 16, withDots = True):
+def CreatePlot(x, y, scaleInfo, dbNotWorking = False, time = 16, withDots = True):
     hover = HoverTool(names=['line'], tooltips=
     [
         ("Mins Ago", "@x"),
@@ -80,6 +80,12 @@ def CreatePlot(x, y, scaleInfo, time = 16, withDots = True):
     graphFig.line(x, y, line_width=3, line_color=lineColors[(scaleInfo.Num - 1) % len(lineColors)], name='line')
     if withDots:
         graphFig.circle(x, y, size=10, color=dotColors[(scaleInfo.Num - 1) % len(dotColors)], alpha=0.7)
+
+    if dbNotWorking:
+        PercentageText = Label(x=time - time/4, y=60, text="DB Not Working",
+                           text_color='white',
+                           text_font_size="35px")
+        graphFig.add_layout(PercentageText)
 
     return graphFig
 
