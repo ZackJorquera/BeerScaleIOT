@@ -9,7 +9,7 @@ import sys
 sys.path.append('../Tools/')
 import ScaleInfoReaderWriter as ScaleIRW
 import MongoReaderWriter as MongoRW
-import MySQLReaderWriter as MySQLRW
+#import MySQLReaderWriter as MySQLRW
 import BokehGraphCreater as GraphCreater
 
 
@@ -25,7 +25,8 @@ def LoadDB():
     if dbToUse == "mongo": # use a switch
         db = MongoRW.MongoDBProfile()
     else:
-        db = MySQLRW.MySQLDBProfile()
+        db = MongoRW.MongoDBProfile()
+        #db = MySQLRW.MySQLDBProfile()
     return db
 
 

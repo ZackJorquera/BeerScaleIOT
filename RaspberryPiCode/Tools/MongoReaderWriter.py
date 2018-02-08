@@ -1,6 +1,4 @@
 from pymongo import MongoClient, IndexModel, DESCENDING
-from ScaleInfoReaderWriter import ScaleInfo
-import uuid
 import time
 
 class MongoDBProfile:
