@@ -4,7 +4,7 @@ import math
 
 
 simulateData = True
-infoFilePath = "../ScaleInfoFile.cfg" # the file directory is still where FlaskMain is and not at this programs file location
+infoFilePath = "../ScaleInfoFile.SIF" # the file directory is still where FlaskMain is and not at this programs file location
 
 class ScaleInfo:
     # scaleInfo is a class used to store the information for each scale.
