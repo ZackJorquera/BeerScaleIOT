@@ -30,7 +30,7 @@ class ScaleInfo:
         try:
             scaleInfoFile = open(infoFilePath, "r")
         except:
-            scaleInfoFile = self.__CreateNewInfoFile(infoFilePath)
+            scaleInfoFile = CreateNewInfoFile(infoFilePath)
 
         line = scaleInfoFile.readline()
         while line != "Scale " + str(self.Num) + "\n":
@@ -70,15 +70,6 @@ class ScaleInfo:
             return 43.24 #will read from the pins using GPIO
 
 
-    def __CreateNewInfoFile(self, filePath):
-        # Create a new InfoFile with no scales programmed into it
-        # The reason that this file is reopened after it is created is because we only want to return the readonly mode of the file.
-        f = open(filePath, "w+")
-        f.write("Total scales:0")
-        f.close()
-        return open(filePath, "r")
-
-
     def Delete(self):
         numScales = GetNumOfScales()
 
@@ -110,7 +101,7 @@ def GetNumOfScales():
     try:
         scaleInfoFile = open(infoFilePath, "r")
     except:
-        return 0
+        scaleInfoFile = CreateNewInfoFile(infoFilePath)
 
     fl = scaleInfoFile.readline()
     scaleInfoFile.close()
@@ -159,3 +150,12 @@ def GetListOfScaleInfos():
         scaleInfoList.append(ScaleInfo(i + 1))
 
     return scaleInfoList
+
+
+def CreateNewInfoFile(filePath):
+    # Create a new InfoFile with no scales programmed into it
+    # The reason that this file is reopened after it is created is because we only want to return the readonly mode of the file.
+    f = open(filePath, "w+")
+    f.write("Total scales:0")
+    f.close()
+    return open(filePath, "r")
