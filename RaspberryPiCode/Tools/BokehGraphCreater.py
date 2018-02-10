@@ -32,7 +32,7 @@ def CreateGauge(percentage, scaleInfo):
     glyph2 = AnnularWedge(x=0, y=0, inner_radius=.7, outer_radius=1, start_angle=math.pi / 2 - (2 * math.pi * percentage),
                           end_angle=math.pi / 2, fill_color=gaugeColors[(scaleInfo.Num - 1) % len(gaugeColors)], name="front")
     PercentageText = Label(text_align='center', text=str(round((percentage * scaleInfo.MaxCapacity), 1)),text_color = 'white',
-                           text_font_size = "35px")
+                           text_font_size="35px")
     lowerText = Label(text_align='center', y=-0.25, text=scaleInfo.Units, text_color='white')
     lowerText2 = Label(text_align='center', y=-0.48, text="Of " + str(scaleInfo.MaxCapacity), text_color='white')
     gaugeFig.add_glyph(glyph)
@@ -53,17 +53,44 @@ def ConvertFigsToComponents(alignment = 'c', *args, **kwargs):
     return components(allFigs)
 
 
-def CreatePlot(x, y, scaleInfo, dbNotWorking = False, time = 16, withDots = True):
+def CreatePlot(x, y, scaleInfo, dbNotWorking = False, minTimeSecs = 60 * 60, withDots = True):
+    if x != list():
+        time = x[len(x) - 1]
+    else:
+        time = 0
+    if time < minTimeSecs: time = minTimeSecs
+
+    if time > 5 * (60 * 60 * 24 * 30.41):  # 5 months
+        timeScale = "Months"
+        for i in range(len(x)):
+            x[i] = x[i] / (60 * 60 * 24 * 30.41)
+        time = time / (60 * 60 * 24 * 30.41)
+    elif time > 5 * (60 * 60 * 24):  # 5 days
+        timeScale = "Days"
+        for i in range(len(x)):
+            x[i] = x[i] / (60 * 60 * 24)
+        time = time / (60 * 60 * 24)
+    elif time > 5 * (60 * 60):  # 5 hours
+        timeScale = "Hours"
+        for i in range(len(x)):
+            x[i] = x[i] / (60 * 60)
+        time = time / (60 * 60)
+    else:
+        timeScale = "Mins"
+        for i in range(len(x)):
+            x[i] = x[i] / (60)
+        time = time / 60
+
     hover = HoverTool(names=['line'], tooltips=
     [
-        ("Mins Ago", "@x"),
+        (timeScale + " Ago", "@x"),
         ("Value", "@y")
     ], mode='vline')
 
     graphFig = figure(title="History Graph for Scale " + str(scaleInfo.Num) + ": " + scaleInfo.Name,
                       plot_width=600, plot_height=600, tools=[hover])
     graphFig.yaxis[0].axis_label = 'Precent Full'
-    graphFig.xaxis[0].axis_label = 'Mins Ago'
+    graphFig.xaxis[0].axis_label = timeScale + ' Ago'
     graphFig.toolbar_location = None
 
     graphFig.x_range = Range1d(time, -1 * (time/20.0))

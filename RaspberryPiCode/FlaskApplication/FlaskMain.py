@@ -52,8 +52,7 @@ def home():
     return render_template("HomePage.html", num=numOfScales)
 
 
-@app.route('/ScaleInfo=<int:num>')
-def getScale(num):
+def CreateScaleGraphFromTimeFrame(num, hours = 150):
     ki = ScaleIRW.ScaleInfo(num)
     totalScales = ScaleIRW.GetNumOfScales()
     value = ki.GetValue()
@@ -62,7 +61,7 @@ def getScale(num):
     dbNotWorking = False
     try:
         if ScaleDataDB.Connected == True:
-            timeFrameData = ScaleDataDB.GetTimeFrameFor(ki, 31)
+            timeFrameData = ScaleDataDB.GetTimeFrameFor(ki, hours)
         else:
             raise Exception('GetTimeFrameFor failed')
     except:
@@ -71,15 +70,14 @@ def getScale(num):
         t = threading.Thread(target=Reconnect)
         t.start()
 
-
     y = timeFrameData['valueList']
     x = timeFrameData['timeStampList']
 
-    js_resources,css_resources = GraphCreater.GetStaticResources()
+    js_resources, css_resources = GraphCreater.GetStaticResources()
 
     # render template
     gfig = GraphCreater.CreateGauge(value, ki)
-    pfig = GraphCreater.CreatePlot(x,y, ki, dbNotWorking, time = 30, withDots = False)
+    pfig = GraphCreater.CreatePlot(x, y, ki, dbNotWorking, withDots=False)
     script, div = GraphCreater.ConvertFigsToComponents('c', gfig, pfig)
 
     html = render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name,
@@ -90,11 +88,44 @@ def getScale(num):
     return GraphCreater.encodeTOUTF8(html)
 
 
-@app.route('/ScaleInfo=<int:num>', methods=['POST'])
-def getScalePost(num):
-    ki = ScaleIRW.ScaleInfo(num)
-    ki.Delete()
-    return redirect(url_for('home'))
+@app.route('/ScaleInfo=<int:num>', methods=['GET', 'POST'])
+def getScale(num):
+    if request.method == 'GET':
+        return CreateScaleGraphFromTimeFrame(num)
+    elif request.method == 'POST':
+        if request.form['_action'] == 'DELETE':
+            ki = ScaleIRW.ScaleInfo(num)
+            ki.Delete()
+            return redirect(url_for('home'))
+        elif request.form['_action'] == 'ShowLastDay':
+            return redirect(url_for('getScaleWithTimeFrame', num=num, hours=24))
+        elif request.form['_action'] == 'ShowLastWeek':
+            return redirect(url_for('getScaleWithTimeFrame', num=num, hours=(24*7)))
+        elif request.form['_action'] == 'ShowHoursAgo':
+            h = request.form['HoursAgo']
+            return redirect(url_for('getScaleWithTimeFrame', num=num, hours=h))
+        elif request.form['_action'] == 'ShowDefault':
+            return redirect(url_for('getScale', num=num))
+
+
+@app.route('/ScaleInfo=<int:num>t=<int:hours>', methods=['GET', 'POST'])
+def getScaleWithTimeFrame(num, hours):
+    if request.method == 'GET':
+        return CreateScaleGraphFromTimeFrame(num, hours)
+    elif request.method == 'POST':
+        if request.form['_action'] == 'DELETE':
+            ki = ScaleIRW.ScaleInfo(num)
+            ki.Delete()
+            return redirect(url_for('home'))
+        elif request.form['_action'] == 'ShowLastDay':
+            return redirect(url_for('getScaleWithTimeFrame', num=num, hours=24))
+        elif request.form['_action'] == 'ShowLastWeek':
+            return redirect(url_for('getScaleWithTimeFrame', num=num, hours=(24*7)))
+        elif request.form['_action'] == 'ShowHoursAgo':
+            h = request.form['HoursAgo']
+            return redirect(url_for('getScaleWithTimeFrame', num=num, hours=h))
+        elif request.form['_action'] == 'ShowDefault':
+            return redirect(url_for('getScale', num=num))
 
 
 @app.route('/AddScale')

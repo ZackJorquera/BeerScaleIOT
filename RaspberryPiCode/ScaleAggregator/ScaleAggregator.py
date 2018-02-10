@@ -7,6 +7,7 @@ import MongoReaderWriter as MongoRW
 
 
 dbToUse = "mongo" # TODO: From Config
+printPushes = False
 
 
 def LoadDB():
@@ -22,15 +23,15 @@ ScaleDataDB = LoadDB()
 
 scaleInfoList = None
 loopOn = 0
-secsPerParsist = 10 # TODO: From Config
+secsPerParsist = 60 # TODO: From Config
 timeOfLastUpdate = None
 while True:
     timeOfLastUpdate = time.time()
 
-    if scaleInfoList == None or loopOn > 20 or len(scaleInfoList) != ScaleIRW.GetNumOfScales(): # TODO: get the 20 from Config
+    if scaleInfoList is None or loopOn > 20 or len(scaleInfoList) != ScaleIRW.GetNumOfScales(): # TODO: get the 20 from Config
         scaleInfoList = ScaleIRW.GetListOfScaleInfos()
 
-    if ScaleDataDB.Connected == True:
+    if ScaleDataDB.Connected:
         successfulPushes = 0
         failedPushes = 0
 
@@ -41,9 +42,13 @@ while True:
             except:
                 failedPushes += 1
 
-        print str(successfulPushes) + " documents successfully added to database" \
-              " with " + str(failedPushes) + " fails. " \
-              "Waiting " + str(secsPerParsist) + " seconds before next update."
+        if printPushes:
+            print str(successfulPushes) + " documents successfully added to database" \
+                  " with " + str(failedPushes) + " fails. " \
+                  "Waiting " + str(secsPerParsist) + " seconds before next update."
+        else:
+            if failedPushes > 0:
+                print str(failedPushes) + " documents failed to push to database."
 
         if successfulPushes == 0 and len(scaleInfoList) != 0:
             print "DB failed to push, attempting Reconnect."

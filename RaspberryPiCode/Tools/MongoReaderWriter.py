@@ -53,11 +53,11 @@ class MongoDBProfile:
         return
 
 
-    def GetTimeFrameFor(self, scaleInfo, timeSpanMins):
+    def GetTimeFrameFor(self, scaleInfo, timeSpanHours):
         scaleUUID = scaleInfo.UUID
 
         endTime = time.time()
-        startTime = endTime - timeSpanMins * 60
+        startTime = endTime - (timeSpanHours * 60 * 60)
 
         cursor = self.Collection.find({"t":{"$gte": startTime, "$lte": endTime},"c":scaleUUID}) # Finds all documents with values of 't' less than endTime and greater
                                                                                                 # than startTime and having the value of "c" equal to scaleInfo.UUID
@@ -65,7 +65,7 @@ class MongoDBProfile:
         valueList = list()
 
         for item in cursor:
-            timeStampList.append(-1 * (item['t'] - time.time())/60)
+            timeStampList.append(-1 * (item['t'] - time.time()))
             valueList.append(item['v'])
 
         timeFrameData = {'valueList': valueList, 'timeStampList': timeStampList}

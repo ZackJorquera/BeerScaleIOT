@@ -64,8 +64,8 @@ class ScaleInfo:
 
     def __ReadFromPin(self, dataPin, clockPin):
         if simulateData:
-            return (math.sin(3 * math.pi * (time.time() - 1516000000) / 1000 + self.Num) * (50 / 2) +
-                    math.sin(2 * math.pi * (time.time() - 1516000000) / 1000 + self.Num) * (50 / 2) + 50)
+            return (math.sin(3 * math.pi * (time.time() - 1516000000) / 88000 + self.Num) * (50 / 2) +
+                    math.sin(2 * math.pi * (time.time() - 1516000000) / 88000 + self.Num) * (50 / 2) + 50)
         else:
             return 43.24 #will read from the pins using GPIO
 
