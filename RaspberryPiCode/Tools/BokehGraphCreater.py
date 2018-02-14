@@ -44,13 +44,17 @@ def CreateGauge(percentage, scaleInfo):
     return gaugeFig
 
 
-def ConvertFigsToComponents(alignment = 'c', *args, **kwargs):
-    if(alignment == 'c'):
-        allFigs = column(*args)
-    else:
+def CombineFigs(alignment='h', *args, **kwargs):
+    if(alignment == 'h'):#h is horizontal
         allFigs = row(*args)
+    else:
+        allFigs = column(*args)
 
-    return components(allFigs)
+    return allFigs
+
+
+def GetComponentsFromFig(fig):
+    return components(fig)
 
 
 def CreatePlot(x, y, scaleInfo, dbNotWorking = False, minTimeSecs = 60 * 60, withDots = True):

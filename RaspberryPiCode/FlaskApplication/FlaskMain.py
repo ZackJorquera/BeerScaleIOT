@@ -49,7 +49,22 @@ def start():
 @app.route('/Home')
 def home():
     numOfScales = ScaleIRW.GetNumOfScales()
-    return render_template("HomePage.html", num=numOfScales)
+
+    js_resources, css_resources = GraphCreater.GetStaticResources()
+
+    horizontalAlignments = list()
+    for i in range(int(math.ceil(numOfScales/2.0))):
+        scale1 = ScaleIRW.ScaleInfo(i*2+1)
+        if i*2+1 < numOfScales:
+            scale2 = ScaleIRW.ScaleInfo(i*2+2)
+            horizontalAlignments.append(GraphCreater.CombineFigs('h', GraphCreater.CreateGauge(scale1.GetValue(), scale1),
+                                                                      GraphCreater.CreateGauge(scale2.GetValue(), scale2)))
+        else:
+            horizontalAlignments.append(GraphCreater.CreateGauge(scale1.GetValue(), scale1))
+
+    script, div = GraphCreater.GetComponentsFromFig(GraphCreater.CombineFigs('v', horizontalAlignments))
+
+    return render_template("HomePage.html", num=numOfScales, plot_script=script, plot_div=div, js_resources=js_resources, css_resources=css_resources)
 
 
 def CreateScaleGraphFromTimeFrame(num, hours = 150):
@@ -78,7 +93,7 @@ def CreateScaleGraphFromTimeFrame(num, hours = 150):
     # render template
     gfig = GraphCreater.CreateGauge(value, ki)
     pfig = GraphCreater.CreatePlot(x, y, ki, dbNotWorking, withDots=False)
-    script, div = GraphCreater.ConvertFigsToComponents('c', gfig, pfig)
+    script, div = GraphCreater.GetComponentsFromFig(GraphCreater.CombineFigs('v', gfig, pfig))
 
     html = render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name,
                            unit=ki.Units,
