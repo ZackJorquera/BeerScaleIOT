@@ -6,11 +6,11 @@ import threading
 from flask import Flask, render_template, redirect, url_for, request
 
 import sys
+import BokehGraphCreater as GraphCreater
 sys.path.append('../Tools/')
 import ScaleInfoReaderWriter as ScaleIRW
 import MongoReaderWriter as MongoRW
 #import MySQLReaderWriter as MySQLRW
-import BokehGraphCreater as GraphCreater
 
 
 dbToUse = "mongo" # TODO: From Config
