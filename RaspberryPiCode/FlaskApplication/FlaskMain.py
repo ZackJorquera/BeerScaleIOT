@@ -55,8 +55,10 @@ def home():
     horizontalAlignments = list()
     for i in range(int(math.ceil(numOfScales/2.0))):
         scale1 = ScaleIRW.ScaleInfo(i*2+1)
+        scale1.startGPIO()
         if i*2+1 < numOfScales:
             scale2 = ScaleIRW.ScaleInfo(i*2+2)
+            scale2.startGPIO()
             horizontalAlignments.append(GraphCreater.CombineFigs('h', GraphCreater.CreateGauge(scale1.GetValue(), scale1),
                                                                       GraphCreater.CreateGauge(scale2.GetValue(), scale2)))
         else:
@@ -67,8 +69,9 @@ def home():
     return render_template("HomePage.html", num=numOfScales, plot_script=script, plot_div=div, js_resources=js_resources, css_resources=css_resources)
 
 
-def CreateScaleGraphFromTimeFrame(num, hours = 150):
+def CreateScaleGraphFromTimeFrame(num, hours=730):
     ki = ScaleIRW.ScaleInfo(num)
+    ki.startGPIO()
     totalScales = ScaleIRW.GetNumOfScales()
     value = ki.GetValue()
 
@@ -149,6 +152,27 @@ def addScale():
     return render_template("AddScale.html", num=num)
 
 
+@app.route('/AddScale<int:num>/Range', methods=['GET', 'POST'])
+def setScaleRange(num):
+    totalNum = ScaleIRW.GetNumOfScales()
+    s = ScaleIRW.ScaleInfo(num)
+    if request.method == 'GET':
+        return render_template("SetRange.html", totalNum=totalNum, num=num, lr=s.EmptyValue, ur=s.FullValue)
+    elif request.method == 'POST':
+        s.startGPIO()
+        if request.form['submit'] == 'Get Empty Value':
+            s.GetLowerRange()
+            s.SetRange(s.EmptyValue, request.form['FullValue'])
+            return redirect(url_for('setScaleRange', num=num))
+        elif request.form['submit'] == 'Get Full Value':
+            s.GetUpperRange()
+            s.SetRange(request.form['EmptyValue'], s.FullValue)
+            return redirect(url_for('setScaleRange', num=num))
+        elif request.form['submit'] == 'Set':
+            s.SetRange(request.form['EmptyValue'], request.form['FullValue'])
+            return redirect(url_for('getScale', num=num))
+
+
 @app.route('/AddScale', methods=['POST'])
 def addScalePost():
     Type = request.form['Type']
@@ -159,7 +183,7 @@ def addScalePost():
     ClockPin = request.form['ClockPin']
 
     num = ScaleIRW.AddScaleInfoToFile(Type, Name, MaxCapacity, Units, DataPin, ClockPin)
-    return redirect(url_for('getScale', num=num))
+    return redirect(url_for('setScaleRange', num=num))
 
 
 if __name__ == "__main__":
