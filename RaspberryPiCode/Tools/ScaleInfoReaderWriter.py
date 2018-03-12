@@ -35,9 +35,9 @@ class ScaleInfo:
             GPIO.setup(self.ClockPin, GPIO.OUT)
             GPIO.setup(self.DataPin, GPIO.IN)
 
-            GPIO.output(self.ClockPin, GPIO.HIGH)
-            time.sleep(0.0001)
-            GPIO.output(self.ClockPin, GPIO.LOW)
+            GPIO.output(self.ClockPin, GPIO.HIGH) # go to sleep
+            time.sleep(0.00007)
+            #GPIO.output(self.ClockPin, GPIO.LOW)
 
 
     def __GetDataForScale(self):
@@ -94,11 +94,24 @@ class ScaleInfo:
 
         fw = open(infoFilePath, "w")
 
-        for line in range(len(data)-2):
-            fw.write(data[line])
+        i = 0;
+        while data[i] != "Scale " + str(self.Num) + "\n":
+            line = data[i]
+            fw.write(data[i])
+            i += 1
+
+        for i in range(i, i + 8):
+            line = data[i]
+            fw.write(line)
+        i += 1
 
         fw.write("Empty Value:" + str(emptyValue) + "\n")
         fw.write("Full Value:" + str(fullValue) + "\n")
+        i += 2
+
+        for i in range(i, len(data)):
+            line = data[i]
+            fw.write(line)
 
         fw.close()
 
@@ -121,6 +134,9 @@ class ScaleInfo:
             return (math.sin(3 * math.pi * (time.time() - 1516000000) / 88000 + self.Num) * (50 / 2) +
                     math.sin(2 * math.pi * (time.time() - 1516000000) / 88000 + self.Num) * (50 / 2) + 50)
         else:
+            GPIO.output(self.ClockPin, GPIO.LOW)  # power on
+            time.sleep(0.000001)
+
             sum = 0
             repeats = 5.0
             for repeat in range(repeats):
@@ -139,11 +155,15 @@ class ScaleInfo:
                 for j in range(2, -1, -1):
                     for i in range(7, -1, -1):
                         GPIO.output(self.ClockPin, GPIO.HIGH)
-                        dataBits[j][i] = GPIO.input(self.DataPin)
+                        time.sleep(0.000001)
                         GPIO.output(self.ClockPin, GPIO.LOW)
+                        dataBits[j][i] = GPIO.input(self.DataPin)
+                        time.sleep(0.000001)
                 for i in range(1):
                     GPIO.output(self.ClockPin, GPIO.HIGH)
+                    time.sleep(0.000001)
                     GPIO.output(self.ClockPin, GPIO.LOW)
+                    time.sleep(0.00001)
 
                 bits = []
                 for j in range(2, -1, -1):
@@ -151,6 +171,9 @@ class ScaleInfo:
 
                 val = int(''.join(map(str, bits)), 2)
                 sum += val
+
+            GPIO.output(self.ClockPin, GPIO.HIGH)  # power off
+            time.sleep(0.00007)
 
             return sum / repeats
 
@@ -223,7 +246,10 @@ def AddScaleInfoToFile(type, name, max, units, dataPin, clockPin):
     fw.write("Data Pin:" + dataPin + "\n")
     fw.write("Clock Pin:" + clockPin + "\n")
     fw.write("Empty Value:" + "0.0" + "\n")
-    fw.write("Full Value:" + "100.0" + "\n")
+    if(simulateData):
+        fw.write("Full Value:" + "100.0" + "\n")
+    else:
+        fw.write("Full Value:" + "8388607.0" + "\n")
 
     fw.close()
 

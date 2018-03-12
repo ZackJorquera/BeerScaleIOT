@@ -6,12 +6,12 @@ import MongoReaderWriter as MongoRW
 #import MySQLReaderWriter as MySQLRW
 
 
-dbToUse = "mongo" # TODO: From Config
+dbToUse = "Mongo" # TODO: From Config
 printPushes = False
 
 
 def LoadDB():
-    if dbToUse == "mongo": # use a switch
+    if dbToUse == "Mongo": # use a switch
         db = MongoRW.MongoDBProfile()
     else:
         db = MongoRW.MongoDBProfile()
@@ -25,6 +25,10 @@ scaleInfoList = None
 loopOn = 0
 secsPerParsist = 60 # TODO: From Config
 timeOfLastUpdate = None
+
+print "Starting Aggregation every " + str(secsPerParsist) + " Second."
+print "Outputting to " + dbToUse + " database at: " + str(ScaleDataDB.Client.address)
+
 while True:
     timeOfLastUpdate = time.time()
 
