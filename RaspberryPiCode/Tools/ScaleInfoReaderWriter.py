@@ -6,7 +6,7 @@ from QuickPulse import *
 import RPi.GPIO as GPIO
 
 
-GPIO.setwarning(False)  # find a better way
+GPIO.setwarnings(False)  # find a better way
 
 simulateData = False
 infoFilePath = "../ScaleInfoFile.SIF"  # the file directory is still where FlaskMain is and not at this programs file location
