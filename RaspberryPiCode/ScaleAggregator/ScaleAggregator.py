@@ -27,7 +27,8 @@ secsPerParsist = 60 # TODO: From Config
 timeOfLastUpdate = None
 
 print "Starting Aggregation every " + str(secsPerParsist) + " Second."
-print "Outputting to " + dbToUse + " database at: " + str(ScaleDataDB.Client.address)
+if ScaleDataDB.Client != None:
+    print "Outputting to " + dbToUse + " database at: " + str(ScaleDataDB.Client.address)
 
 while True:
     timeOfLastUpdate = time.time()

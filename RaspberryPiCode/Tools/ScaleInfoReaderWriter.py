@@ -6,11 +6,12 @@ from QuickPulse import *
 import RPi.GPIO as GPIO
 
 
-simulateData = True
-infoFilePath = "../ScaleInfoFile.SIF" # the file directory is still where FlaskMain is and not at this programs file location
+GPIO.setwarning(False)  # find a better way
+
+simulateData = False
+infoFilePath = "../ScaleInfoFile.SIF"  # the file directory is still where FlaskMain is and not at this programs file location
 useCQuickPulse = True
 GPIO.setmode(GPIO.BCM)
-# GPIO.setwarning(False)
 
 
 class ScaleInfo:
@@ -245,14 +246,8 @@ def AddScaleInfoToFile(type, name, max, units, dataPin, clockPin):
     fw.write("Units:" + units + "\n")
     fw.write("Data Pin:" + dataPin + "\n")
     fw.write("Clock Pin:" + clockPin + "\n")
-    if (simulateData):
-        fw.write("Empty Value:" + "0.0" + "\n")
-    else:
-        fw.write("Empty Value:" + "-8388608.0" + "\n")
-    if(simulateData):
-        fw.write("Full Value:" + "100.0" + "\n")
-    else:
-        fw.write("Full Value:" + "8388607.0" + "\n")
+    fw.write("Empty Value:" + "0.0" + "\n")
+    fw.write("Full Value:" + "100.0" + "\n")
 
     fw.close()
 
@@ -279,7 +274,7 @@ def CreateNewInfoFile(filePath):
     return open(filePath, "r")
 
 
-def bitWrite(self, x, n, b):
+def bitWrite(x, n, b):
     if n <= 7 and n >= 0:
         if b == 1:
             x |= (1 << n)
