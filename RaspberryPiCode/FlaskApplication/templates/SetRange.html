@@ -10,20 +10,20 @@
 <div id="container">
 	<div id="intro">
 		<div id="pageHeaderTwo">
-			<h1><span>Add a Scale</span></h1>
+			<h1><span>Almost Done</span></h1>
 		</div>
 
 		<div id="preamble">
-            <form method="POST">
-                <h2><span>Scale Info</span></h2>
-                <p> Type: <input name="Type"><br />
-                    Name: <input name="Name"><br />
-                    Max Capacity: <input name="MaxCapacity"><br />
-                    Units: <input name="Units"><br />
-                    Data Pin: <input name="DataPin"><br />
-                    Clock Pin: <input name="ClockPin"></p>
-                <input type="submit", value="Create">
-            </form>
+			<p>Note that as more pressure is applied the value decreases.</p>
+			<form method="POST">
+				Empty Value: <input name="EmptyValue", value="{{  lr  }}">
+					<input type="submit" name="submit" value="Get Empty Value" /><br />
+
+				Full Value: <input name="FullValue", value="{{  ur  }}">
+						<input type="submit" name="submit" value="Get Full Value" /><br />
+
+				<input type="submit" name="submit" value="Set">
+			</form>
 		</div>
 	</div>
 
@@ -39,7 +39,7 @@
 
 			<div id="larchives">
 				<ul>
-					{% for i in range(1,num+1) %}
+					{% for i in range(1,totalNum+1) %}
                         <li><a href="/ScaleInfo={{ i }}">Scale {{ i }}</a></li>
                     {% endfor %}
 					<li><a href="/AddScale">Add a Scale</a></li>
