@@ -84,6 +84,7 @@ def CreateScaleGraphFromTimeFrame(num, hours=730):
             raise Exception('GetTimeFrameFor failed')
     except:
         dbNotWorking = True
+        ScaleDataDB.Connected = False
         timeFrameData = {'valueList': list(), 'timeStampList': list()}
         t = threading.Thread(target=Reconnect)
         t.start()

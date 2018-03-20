@@ -1,12 +1,14 @@
 import uuid
 import time
 import math
-import statistics
+#import statistics
+from QuickPulse import *
 import RPi.GPIO as GPIO
 
 
 simulateData = True
 infoFilePath = "../ScaleInfoFile.SIF" # the file directory is still where FlaskMain is and not at this programs file location
+useCQuickPulse = True
 GPIO.setmode(GPIO.BCM)
 # GPIO.setwarning(False)
 
@@ -139,42 +141,41 @@ class ScaleInfo:
             #time.sleep(0.000001)
 
             repeats = 10
-            vals = [repeats]
+            totalVals = 0
             for repeat in range(repeats):
-                b1 = []; b2 = []; b3 = []
-                for i in range(8):
-                    b1.append(False); b2.append(False); b3.append(False)
-                dataBits = [b1,b2,b3]
+                dataBits = [0,0,0]
 
                 while GPIO.input(self.DataPin) != 0:
                     pass
 
                 for j in range(2, -1, -1):
                     for i in range(7, -1, -1):
-                        GPIO.output(self.ClockPin, GPIO.HIGH)
-                        #time.sleep(0.000001)
-                        GPIO.output(self.ClockPin, GPIO.LOW)
-                        dataBits[j][i] = GPIO.input(self.DataPin)
-                        #time.sleep(0.000001)
-                for i in range(1):
+                        if useCQuickPulse:
+                            dataBits[j] = bitWrite(dataBits[j], i, DoQuickPulse(self.ClockPin, self.DataPin))
+                        else:
+                            GPIO.output(self.ClockPin, GPIO.HIGH)
+                            GPIO.output(self.ClockPin, GPIO.LOW)
+                            dataBits[j] = bitWrite(dataBits[j], i, GPIO.input(self.DataPin))
+
+                if useCQuickPulse:
+                    DoQuickPulse(self.ClockPin, self.DataPin)
+                else:
                     GPIO.output(self.ClockPin, GPIO.HIGH)
-                    #time.sleep(0.000001)
                     GPIO.output(self.ClockPin, GPIO.LOW)
-                    #time.sleep(0.00001)
 
-                bits = []
-                for j in range(2, -1, -1):
-                    bits += dataBits[j]
+                val = (dataBits[2] << 16 | dataBits[1] << 8) | dataBits[0]
 
-                val = int(''.join(map(str, bits)), 2)
-                vals[repeat] = val
+                if dataBits[2] & 128:
+                    val = val - (1 << 24)
+
+                totalVals += val
 
                 time.sleep(0.00001)
 
             GPIO.output(self.ClockPin, GPIO.HIGH)  # power off
             time.sleep(0.00007)
 
-            return statistics.median(vals)
+            return totalVals/repeats
 
 
     def Delete(self):
@@ -276,3 +277,12 @@ def CreateNewInfoFile(filePath):
     f.write("Total scales:0")
     f.close()
     return open(filePath, "r")
+
+
+def bitWrite(self, x, n, b):
+    if n <= 7 and n >= 0:
+        if b == 1:
+            x |= (1 << n)
+        else:
+            x &= ~(1 << n)
+    return x
