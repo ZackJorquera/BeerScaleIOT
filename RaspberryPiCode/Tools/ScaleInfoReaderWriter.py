@@ -1,7 +1,7 @@
 import uuid
 import time
 import math
-#import statistics
+import statistics
 from QuickPulse import *
 import RPi.GPIO as GPIO
 
@@ -11,6 +11,8 @@ GPIO.setwarnings(False)  # find a better way
 simulateData = False
 infoFilePath = "../ScaleInfoFile.SIF"  # the file directory is still where FlaskMain is and not at this programs file location
 useCQuickPulse = True
+useMedian = True
+
 GPIO.setmode(GPIO.BCM)
 
 
@@ -142,7 +144,7 @@ class ScaleInfo:
             #time.sleep(0.000001)
 
             repeats = 10
-            totalVals = 0
+            totalVals = list()
             for repeat in range(repeats):
                 dataBits = [0,0,0]
 
@@ -169,14 +171,17 @@ class ScaleInfo:
                 if dataBits[2] & 128:
                     val = val - (1 << 24)
 
-                totalVals += val
+                totalVals.append(val)
 
                 time.sleep(0.00001)
 
             GPIO.output(self.ClockPin, GPIO.HIGH)  # power off
             time.sleep(0.00007)
 
-            return totalVals/repeats
+            if useMedian:
+                return statistics.median(totalVals)
+            else:
+                return statistics.mean(totalVals)
 
 
     def Delete(self):
