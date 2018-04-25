@@ -10,10 +10,11 @@ import BokehGraphCreater as GraphCreater
 sys.path.append('../Tools/')
 import ScaleInfoReaderWriter as ScaleIRW
 import MongoReaderWriter as MongoRW
+import ConfigReaderWriter as CfgRW
 #import MySQLReaderWriter as MySQLRW
 
 
-dbToUse = "mongo" # TODO: From Config
+dbToUse = CfgRW.cfgVars["dbToUse"]
 
 
 ScaleDataDB = None

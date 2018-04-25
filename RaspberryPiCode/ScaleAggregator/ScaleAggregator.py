@@ -3,11 +3,12 @@ import sys
 sys.path.append('../Tools/')
 import ScaleInfoReaderWriter as ScaleIRW
 import MongoReaderWriter as MongoRW
+import ConfigReaderWriter as CfgRW
 #import MySQLReaderWriter as MySQLRW
 
 
-dbToUse = "Mongo" # TODO: From Config
-printPushes = False
+dbToUse = CfgRW.cfgVars["dbToUse"]
+printPushes = CfgRW.cfgVars["aggregatorprintPushes"]
 
 
 def LoadDB():
@@ -47,7 +48,7 @@ while True:
             except:
                 failedPushes += 1
 
-        if printPushes:
+        if printPushes.upper() == "TRUE":
             print str(successfulPushes) + " documents successfully added to database" \
                   " with " + str(failedPushes) + " fails. " \
                   "Waiting " + str(secsPerParsist) + " seconds before next update."
