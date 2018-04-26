@@ -1,5 +1,6 @@
 from pymongo import MongoClient, IndexModel, DESCENDING
 import time
+import ConfigReaderWriter as CfgRW
 
 class MongoDBProfile:
 
@@ -13,11 +14,11 @@ class MongoDBProfile:
         def asBSON(self):
             return {"c": self.id, "v": self.Value, "t": self.TimeStamp}
 
-    def __init__(self, hostServer='localhost', hostPort=27017, dbName='ScaleLiquidRemainingIOT', collectionName='ScaleData'):
-        self.HostServer = hostServer
-        self.HostPort = hostPort
-        self.DBName = dbName
-        self.CollectionName = collectionName
+    def __init__(self):
+        self.HostServer = CfgRW.cfgVars["dbHostServer"]
+        self.HostPort = int(CfgRW.cfgVars["dbHostPort"],10)
+        self.DBName = CfgRW.cfgVars["dbName"]
+        self.CollectionName = CfgRW.cfgVars["dbCollectionName"]
 
         self.Connected = self.__Connect()
 

@@ -14,6 +14,11 @@ cfgVars = \
     'aggregatorSecsPerParsist': "60",
     'aggregatorLoopsOfParsists': "20",
     'aggregatorprintPushes': "false",
+
+    'dbHostServer': "localhost",
+    'dbHostPort': "27017",
+    'dbName': "ScaleLiquidRemainingIOT",
+    'dbCollectionName': "ScaleData"
 }
 
 

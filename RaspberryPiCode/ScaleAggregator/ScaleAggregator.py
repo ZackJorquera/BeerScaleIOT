@@ -24,17 +24,18 @@ ScaleDataDB = LoadDB()
 
 scaleInfoList = None
 loopOn = 0
-secsPerParsist = 60 # TODO: From Config
+secsPerParsist = int(CfgRW.cfgVars["aggregatorSecsPerParsist"],10) # try catch
+loopsOfParsists = int(CfgRW.cfgVars["aggregatorLoopsOfParsists"],10)
 timeOfLastUpdate = None
 
 print "Starting Aggregation every " + str(secsPerParsist) + " Second."
 if ScaleDataDB.Client != None:
-    print "Outputting to " + dbToUse + " database at: " + str(ScaleDataDB.Client.address)
+    print "Outputting to " + dbToUse + " database " + ScaleDataDB.DBName + " at: " + str(ScaleDataDB.Client.address)
 
 while True:
     timeOfLastUpdate = time.time()
 
-    if scaleInfoList is None or loopOn > 20 or len(scaleInfoList) != ScaleIRW.GetNumOfScales(): # TODO: get the 20 from Config
+    if scaleInfoList is None or loopOn > loopsOfParsists or len(scaleInfoList) != ScaleIRW.GetNumOfScales():
         scaleInfoList = ScaleIRW.GetListOfScaleInfos()
 
     if ScaleDataDB.Connected:
