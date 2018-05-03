@@ -38,7 +38,7 @@ def ReadInVals():
 
     for key, value in cfgVars.iteritems():
         for line in lines:
-            parts = re.findall(r"[\w']+", line)
+            parts = re.findall(r"[\w\.']+", line)
             if parts[0] == key:
                 cfgVars[key] = parts[1]
     f.close()
