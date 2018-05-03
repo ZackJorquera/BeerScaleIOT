@@ -11,8 +11,8 @@ gcc -shared -I/usr/include/python2.7 -lpython2.7 RaspberryPiCode/Tools/QuickPuls
 echo "Creating Aliases"
 echo "echo \"alias startflaskapp=\"(cd `pwd`/RaspberryPiCode/FlaskApplication/; python FlaskMain.py)\"\" >> ~/.bashrc"
 echo "alias startflaskapp=\"(cd `pwd`/RaspberryPiCode/FlaskApplication/; python FlaskMain.py)\"" >> ~/.bashrc
-echo "echo \"alias startscaleaggregator=\"(cd `pwd`/RaspberryPiCode/Tools/; python ScaleAggregator.py)\"\" >> ~/.bashrc"
-echo "alias startscaleaggregator=\"(cd `pwd`/RaspberryPiCode/Tools/; python ScaleAggregator.py)\"" >> ~/.bashrc
+echo "echo \"alias startscaleaggregator=\"(cd `pwd`/RaspberryPiCode/ScaleAggregator/; python ScaleAggregator.py)\"\" >> ~/.bashrc"
+echo "alias startscaleaggregator=\"(cd `pwd`/RaspberryPiCode/ScaleAggregator/; python ScaleAggregator.py)\"" >> ~/.bashrc
 echo ". ~/.bashrc"
 . ~/.bashrc
 
