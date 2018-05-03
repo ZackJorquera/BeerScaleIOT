@@ -70,4 +70,12 @@ bash setup.sh
 ```
 
 ## Run
-If everything was set up properly then both the flask app and the aggregator should start on startup. If they don't then they can be started by calling the aliases. 
+If everything was set up properly then both the flask app and the aggregator should start on startup. If they don't then they can be started by calling the aliases. Use ```ifconfig``` to get the IP address of the pi (eth0 for ethernet and wlan0 for wireless), this is what you use for the URL to the flask web site. The flask app should be at "http://<ip address of the pi>:5000/" Additionally, you can set up ssh to be able to connect to the pi from an external computer. Because the default version in raspbian does not work you will have to reinstall it.
+```
+sudo apt-get install --reinstall openssh-server
+```
+To connect to the pi with ssh use [PuTTY](https://www.putty.org/) if you are on windows, or run the following command for Linux or macOS
+```
+ssh pi@<ip address of the pi>
+```
+Use 'raspberry' as the password. You might need to [create an ssh key](https://confluence.atlassian.com/bitbucketserver/creating-ssh-keys-776639788.html) if you haven't already.
