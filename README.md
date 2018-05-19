@@ -64,13 +64,19 @@ cd /home/pi/Documents
 git clone https://github.com/ZackJorquera/ScaleLiquidRemainingIOT.git
 
 ```
-And run the setup.bash script
+And run the setup.sh script
 ```
 bash setup.sh
 ```
 
 ## Run
-If everything was set up properly then both the flask app and the aggregator should start on startup. If they don't then they can be started by calling the aliases. Use ```ifconfig``` to get the IP address of the pi (eth0 for ethernet and wlan0 for wireless), this is what you use for the URL to the flask web site. The flask app should be at ```http://<ip address of the pi>:5000/``` Additionally, you can set up ssh to be able to connect to the pi from an external computer. Because the default version in raspbian does not work you will have to reinstall it.
+If everything was set up properly then both the flask app and the aggregator should launch when you call their aliases. Use ```ifconfig``` to get the IP address of the pi (eth0 for ethernet and wlan0 for wireless), this is what you use for the URL to the flask web site. The flask app should be at ```http://<ip address of the pi>:5000/```
+If you want to have everything run on startup you must add the following line to the file /etc/rc.local before the exit call on the PI.
+```
+startflaskapp
+startscaleagreggator
+```
+Additionally, you can set up ssh to be able to connect to the pi from an external computer. Because the default version in raspbian does not work you will have to reinstall it.
 ```
 sudo apt-get install --reinstall openssh-server
 ```
@@ -79,3 +85,11 @@ To connect to the pi with ssh use [PuTTY](https://www.putty.org/) if you are on 
 ssh pi@<ip address of the pi>
 ```
 Use 'raspberry' as the password. You might need to [create an ssh key](https://confluence.atlassian.com/bitbucketserver/creating-ssh-keys-776639788.html) if you haven't already.
+
+## Use
+Now that everything has been set up, you are now able to plug in the scales and start reading scale data. Each HX711 chip has 5 outputs that you will need to plug in. Use the below image to know what each GPIO pin does. Remember to turn the Pi off before plugging in any pins.
+First, you need to plug in the 3.3v and the 5v power as well as the ground into their respective GPIO pins. If you are using more than to HX711 chips you will need to connect the power pins in parallel. Now, with the two remaining pins, the data and clock pins, you will need to plug them into two of GPIO labeled pins, It really doesn't matter which pins you use, but try to avoid pins with alternate purposes (use the green pin in the image). Record down their GPIO numbers (not the pin numbers).
+In the flask app, when creating a new scale, input those GPIO nums that you plugged the data and clock pins into, into the setup information section.
+
+![alt text](https://cdn.sparkfun.com/assets/learn_tutorials/4/2/4/header_pinout.jpg "RaspberryPi Pin Layout")
+
