@@ -88,7 +88,7 @@ Use 'raspberry' as the password. You might need to [create an ssh key](https://c
 
 ## Use
 Now that everything has been set up, you are now able to plug in the scales and start reading scale data. Each HX711 chip has 5 outputs that you will need to plug in. Use the below image to know what each GPIO pin does. Remember to turn the Pi off before plugging in any pins.
-First, you need to plug in the 3.3v and the 5v power as well as the ground into their respective GPIO pins. If you are using more than to HX711 chips you will need to connect the power pins in parallel. Now, with the two remaining pins, the data and clock pins, you will need to plug them into two of GPIO labeled pins, It really doesn't matter which pins you use, but try to avoid pins with alternate purposes (use the green pin in the image). Record down their GPIO numbers (not the pin numbers).
+First, you need to plug in the 3.3v (the VDD pin) and the 5v(the VCC pin) power as well as the ground into their respective GPIO pins. If you are using more than to HX711 chips you will need to connect the power pins in parallel. Now, with the two remaining pins, the data and clock pins, you will need to plug them into two of GPIO labeled pins, It really doesn't matter which pins you use, but try to avoid pins with alternate purposes (use the green pin in the image). Record down their GPIO numbers (not the pin numbers).
 In the flask app, when creating a new scale, input those GPIO nums that you plugged the data and clock pins into, into the setup information section.
 
 ![alt text](https://cdn.sparkfun.com/assets/learn_tutorials/4/2/4/header_pinout.jpg "RaspberryPi Pin Layout")
