@@ -7,12 +7,9 @@ import ConfigReaderWriter as CfgRW
 #import MySQLReaderWriter as MySQLRW
 
 
-dbToUse = CfgRW.cfgVars["dbToUse"]
-printPushes = CfgRW.cfgVars["aggregatorprintPushes"]
-
 
 def LoadDB():
-    if dbToUse == "Mongo": # use a switch
+    if CfgRW.cfgVars["dbToUse"] == "Mongo": # use a switch
         db = MongoRW.MongoDBProfile()
     else:
         db = MongoRW.MongoDBProfile()
@@ -30,7 +27,7 @@ timeOfLastUpdate = None
 
 print "Starting Aggregation every " + str(secsPerParsist) + " Second."
 if ScaleDataDB.Client != None:
-    print "Outputting to " + dbToUse + " database " + ScaleDataDB.DBName + " at: " + str(ScaleDataDB.Client.address)
+    print "Outputting to " + CfgRW.cfgVars["dbToUse"] + " database " + ScaleDataDB.DBName + " at: " + str(ScaleDataDB.Client.address)
 
 while True:
     timeOfLastUpdate = time.time()
@@ -49,7 +46,7 @@ while True:
             except:
                 failedPushes += 1
 
-        if printPushes.upper() == "TRUE":
+        if CfgRW.cfgVars["aggregatorPrintPushes"].upper() == "TRUE":
             print str(successfulPushes) + " documents successfully added to database" \
                   " with " + str(failedPushes) + " fails. " \
                   "Waiting " + str(secsPerParsist) + " seconds before next update."

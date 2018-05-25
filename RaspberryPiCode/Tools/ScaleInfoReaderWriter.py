@@ -9,10 +9,10 @@ import RPi.GPIO as GPIO
 
 GPIO.setwarnings(False)  # find a better way
 
-simulateData = CfgRW.cfgVars["simulateData"]
 infoFilePath = "../ScaleInfoFile.SIF"  # the file directory is still where FlaskMain is and not at this programs file location
-useCQuickPulse = CfgRW.cfgVars["useCQuickPulse"]
-useMedian = CfgRW.cfgVars["useMedianOfData"]
+#simulateData = CfgRW.cfgVars["simulateData"]
+#useCQuickPulse = CfgRW.cfgVars["useCQuickPulse"]
+#useMedian = CfgRW.cfgVars["useMedianOfData"]
 
 GPIO.setmode(GPIO.BCM)
 
@@ -38,7 +38,7 @@ class ScaleInfo:
 
 
     def startGPIO(self):
-        if simulateData.upper() != "TRUE":
+        if CfgRW.cfgVars["simulateData"].upper() != "TRUE":
             GPIO.setup(self.ClockPin, GPIO.OUT)
             GPIO.setup(self.DataPin, GPIO.IN)
 
@@ -137,7 +137,7 @@ class ScaleInfo:
             return -1
 
     def __ReadFromPin(self):
-        if simulateData.upper() == "TRUE":
+        if CfgRW.cfgVars["simulateData"].upper() == "TRUE":
             return (math.sin(3 * math.pi * (time.time() - 1516000000) / 88000 + self.Num) * (50 / 2) +
                     math.sin(2 * math.pi * (time.time() - 1516000000) / 88000 + self.Num) * (50 / 2) + 50)
         else:
@@ -154,14 +154,14 @@ class ScaleInfo:
 
                 for j in range(2, -1, -1):
                     for i in range(7, -1, -1):
-                        if useCQuickPulse.upper() == "TRUE":
+                        if CfgRW.cfgVars["useCQuickPulse"].upper() == "TRUE":
                             dataBits[j] = bitWrite(dataBits[j], i, DoQuickPulse(self.ClockPin, self.DataPin))
                         else:
                             GPIO.output(self.ClockPin, GPIO.HIGH)
                             GPIO.output(self.ClockPin, GPIO.LOW)
                             dataBits[j] = bitWrite(dataBits[j], i, GPIO.input(self.DataPin))
 
-                if useCQuickPulse.upper() == "TRUE":
+                if CfgRW.cfgVars["useCQuickPulse"].upper() == "TRUE":
                     DoQuickPulse(self.ClockPin, self.DataPin)
                 else:
                     GPIO.output(self.ClockPin, GPIO.HIGH)
@@ -179,7 +179,7 @@ class ScaleInfo:
             GPIO.output(self.ClockPin, GPIO.HIGH)  # power off
             time.sleep(0.00007)
 
-            if useMedian.upper() == "TRUE":
+            if CfgRW.cfgVars["useMedianOfData"].upper() == "TRUE":
                 return statistics.median(totalVals)
             else:
                 return statistics.mean(totalVals)

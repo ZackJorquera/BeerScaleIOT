@@ -55,7 +55,7 @@
 			<div id="lselect">
 				<ul>
 					<li><a href="/Home">Home</a></li>
-					<li><a href="">Contact</a></li>
+					<li><a href="/Settings">Settings</a></li>
 					<li><a href="https://github.com/ZackJorquera/ScaleLiquidRemainingIOT">GitHub</a></li>
 				</ul>
 			</div>
@@ -63,7 +63,11 @@
 			<div id="larchives">
 				<ul>
 					{% for i in range(1,totalNum+1) %}
-						<li><a href="/ScaleInfo={{ i }}">Scale {{ i }}</a></li>
+						{% if num == i %}
+							<li><a href="/ScaleInfo={{ i }}">*Scale {{ i }}</a></li>
+						{% else %}
+							<li><a href="/ScaleInfo={{ i }}">Scale {{ i }}</a></li>
+						{% endif %}
 					{% endfor %}
 					<li><a href="/AddScale">Add a Scale</a></li>
 				</ul>

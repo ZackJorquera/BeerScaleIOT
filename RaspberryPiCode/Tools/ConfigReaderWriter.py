@@ -13,7 +13,7 @@ cfgVars = \
 
     'aggregatorSecsPerParsist': "60",
     'aggregatorLoopsOfParsists': "20",
-    'aggregatorprintPushes': "false",
+    'aggregatorPrintPushes': "false",
 
     'dbHostServer': "localhost",
     'dbHostPort': "27017",

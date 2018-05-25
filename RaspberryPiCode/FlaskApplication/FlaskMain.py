@@ -14,8 +14,6 @@ import ConfigReaderWriter as CfgRW
 #import MySQLReaderWriter as MySQLRW
 
 
-dbToUse = CfgRW.cfgVars["dbToUse"]
-
 
 ScaleDataDB = None
 reconnecting = False
@@ -23,7 +21,7 @@ lock = threading.Lock()
 
 
 def LoadDB():
-    if dbToUse == "mongo": # use a switch
+    if CfgRW.cfgVars["dbToUse"] == "mongo": # use a switch
         db = MongoRW.MongoDBProfile()
     else:
         db = MongoRW.MongoDBProfile()
@@ -187,6 +185,46 @@ def addScalePost():
     num = ScaleIRW.AddScaleInfoToFile(Type, Name, MaxCapacity, Units, DataPin, ClockPin)
     return redirect(url_for('setScaleRange', num=num))
 
+
+@app.route('/Settings', methods=['GET','POST'])
+def changeSettings():
+    totalNum = ScaleIRW.GetNumOfScales()
+
+    if request.method == 'GET':
+        currentDBToUse = CfgRW.cfgVars["dbToUse"]
+        currentSimulateData = CfgRW.cfgVars["simulateData"]
+        currentUseCQuickPulse = CfgRW.cfgVars["useCQuickPulse"]
+        currentUseMedianOfData = CfgRW.cfgVars["useMedianOfData"]
+
+        currentAggregatorSecsPerParsist = CfgRW.cfgVars["aggregatorSecsPerParsist"]
+        currentAggregatorLoopsOfParsists = CfgRW.cfgVars["aggregatorLoopsOfParsists"]
+        currentAggregatorPrintPushes = CfgRW.cfgVars["aggregatorPrintPushes"]
+
+        currentDBHostServer = CfgRW.cfgVars["dbHostServer"]
+        currentDBHostPort = CfgRW.cfgVars["dbHostPort"]
+        currentDBName = CfgRW.cfgVars["dbName"]
+        currentDBCollectionName = CfgRW.cfgVars["dbCollectionName"]
+
+        return render_template("ChangeSettingPage.html", totalNum=totalNum, currentDBToUse=currentDBToUse, currentSimulateData=currentSimulateData, currentUseCQuickPulse=currentUseCQuickPulse,
+                               currentUseMedianOfData=currentUseMedianOfData, currentAggregatorSecsPerParsist=currentAggregatorSecsPerParsist, currentAggregatorLoopsOfParsists=currentAggregatorLoopsOfParsists,
+                               currentAggregatorPrintPushes=currentAggregatorPrintPushes, currentDBHostServer=currentDBHostServer, currentDBHostPort=currentDBHostPort, currentDBName=currentDBName,
+                               currentDBCollectionName=currentDBCollectionName, num=ScaleIRW.GetNumOfScales())
+    elif request.method == 'POST':
+        CfgRW.cfgVars["dbToUse"] = request.form['dbToUse']
+        CfgRW.cfgVars["simulateData"] = request.form['simulateData']
+        CfgRW.cfgVars["useCQuickPulse"] = request.form['useCQuickPulse']
+        CfgRW.cfgVars["useMedianOfData"] = request.form['useMedianOfData']
+        CfgRW.cfgVars["aggregatorSecsPerParsist"] = request.form['aggregatorSecsPerParsist']
+        CfgRW.cfgVars["aggregatorLoopsOfParsists"] = request.form['aggregatorLoopsOfParsists']
+        CfgRW.cfgVars["aggregatorPrintPushes"] = request.form['aggregatorPrintPushes']
+        CfgRW.cfgVars["dbHostServer"] = request.form['dbHostServer']
+        CfgRW.cfgVars["dbHostPort"] = request.form['dbHostPort']
+        CfgRW.cfgVars["dbName"] = request.form['dbName']
+        CfgRW.cfgVars["dbCollectionName"] = request.form['dbCollectionName']
+
+        CfgRW.CreateNewCFGFile()
+
+        return redirect(url_for('home'))
 
 if __name__ == "__main__":
     app.run(threaded=True,host='0.0.0.0')

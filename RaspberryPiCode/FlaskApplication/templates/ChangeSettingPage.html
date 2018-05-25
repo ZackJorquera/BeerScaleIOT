@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+	<title>Add a Scale</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div id="container">
+	<div id="intro">
+		<div id="pageHeaderTwo">
+			<h1><span>Add a Scale</span></h1>
+		</div>
+
+		<div id="preamble">
+            <form method="POST">
+                <h2><span>Settings</span></h2>
+                <p> Database To Use: <input name="dbToUse", value="{{  currentDBToUse  }}"><br />
+                    Simulate Data: <input name="simulateData", value="{{  currentSimulateData  }}"><br />
+                    Use C Quick Pulse: <input name="useCQuickPulse", value="{{  currentUseCQuickPulse  }}"><br />
+                    Use Median Of Data: <input name="useMedianOfData", value="{{  currentUseMedianOfData  }}"><br /><br />
+
+                    Aggregator Secs Per Parsist: <input name="aggregatorSecsPerParsist", value="{{  currentAggregatorSecsPerParsist  }}"><br />
+                    Aggregator Loops Of Parsists: <input name="aggregatorLoopsOfParsists", value="{{  currentAggregatorLoopsOfParsists  }}"><br />
+                    Aggregator Print Pushes: <input name="aggregatorPrintPushes", value="{{  currentAggregatorPrintPushes  }}"><br /><br />
+
+                    Database Host Server: <input name="dbHostServer", value="{{  currentDBHostServer  }}"><br />
+                    Database Host Port: <input name="dbHostPort", value="{{  currentDBHostPort  }}"><br />
+                    Database Name: <input name="dbName", value="{{  currentDBName  }}"><br />
+                    Database Collection Name: <input name="dbCollectionName", value="{{  currentDBCollectionName  }}"><br />
+
+                <input type="submit" name="submit" value="Set">
+            </form>
+			<p>Please note that for any change to take effect you need to restart the Pi after you click "Set."</p>
+		</div>
+	</div>
+
+	<div id="linkList">
+		<div id="linkList2">
+			<div id="lselect">
+				<ul>
+					<li><a href="/Home">Home</a></li>
+					<li><a href="/Settings">Settings</a></li>
+					<li><a href="https://github.com/ZackJorquera/ScaleLiquidRemainingIOT">GitHub</a></li>
+				</ul>
+			</div>
+
+			<div id="larchives">
+				<ul>
+					{% for i in range(1,num+1) %}
+                        <li><a href="/ScaleInfo={{ i }}">Scale {{ i }}</a></li>
+                    {% endfor %}
+					<li><a href="/AddScale">Add a Scale</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>
