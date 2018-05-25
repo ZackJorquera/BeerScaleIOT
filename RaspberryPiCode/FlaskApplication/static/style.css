@@ -1,32 +1,39 @@
 body { 
 font:75%  Arial, Helvetica, sans-serif;
 color:#333; 
-background:#FDFDFD url(back.png) repeat-y top center;
-margin:0; 
-text-align:center; 
+background:#101010 url(back.png) repeat-y top center;
+margin:0;
+text-align:center;
 }
-
-
-p{ 
+input{
+background:#333333;
+color:#aaaaaa;
+border:1px solid #202020;
+}
+input:hover{
+color:#ffffff;
+}
+p{
 font-size:1em;
 line-height:1.4em;
 margin:0.7em 0 0.7em 0;
 padding:0;
+color:#aaaaaa
 }
 #preamble p,
 #supportingText p{
 margin:0;
 padding:1.4em 0 1.4em 0;
 }
-a{ 
+a{
 color:#900;
 }
 a:hover,
 a:focus,
 a:active
-{ 
-background:black; 
-color:white;
+{
+background:aaaaaa;
+color:101010;
 border:0;
 text-decoration:none;
 }
@@ -37,11 +44,11 @@ border-bottom:1px dotted #900;
 }
 
 
-#container { 
+#container {
 width:700px;
 text-align:left;
-padding:0;  
-margin:0 auto; 
+padding:0;
+margin:0 auto;
 }
 #intro,
 #preamble,
@@ -54,14 +61,11 @@ margin:20px 0 0 0;
 }
 
 #intro #pageHeader {
-	width:450px;
-	height:330px;
-	background:white url(introImage.jpg) no-repeat top center;
 	float:right;
 	margin:10px 0 0 0;
 	padding:0;
 	text-align: right;
-	color: #363435;
+	color: #ffffff;
 }
 #intro #pageHeaderTwo {
     width:500px;
@@ -70,8 +74,12 @@ margin:20px 0 0 0;
 	margin:10px 0 0 0;
 	padding:0;
 	text-align: center;
-	color: #363435;
+	color: #eeeeee;
 }
+h2{
+	color:#dddddd
+}
+
 h3{
 width:290px;
 height:35px;
@@ -79,6 +87,7 @@ margin:5px 0 5px 0;
 padding:0;
 float:right;
 overflow:hidden;
+color:#bbbbbb
 }
 #preamble h3{
 }
@@ -108,7 +117,7 @@ float:none;
 #larchives,
 #lresources
 {
-border-left:1px solid white;
+border-left:1px solid #101010;
 padding:20px 0 0 0;
 margin:0 0 40px 0;
 }
@@ -126,9 +135,9 @@ font-size:0.8em;
 display:block;
 margin:0;
 padding: 0 0 7px 0;
-border-bottom:1px solid #F9F7F6;
+border-bottom:1px solid #101010;
 }
-#linkList li a{ 
+#linkList li a{
 display:block;
 padding:4px 10px 4px 5px;
 margin:0 0 5px 0;
@@ -136,7 +145,7 @@ border:0;
 text-transform:uppercase;
 font-weight:bold;
 text-decoration:none;
-color:#333333;
+color:#aaaaaa;
 }
 #lselect li a,
 #lfavorites li a{
@@ -150,11 +159,11 @@ background-position:0 50% ;
 #linkList li a:focus,
 #linkList li a:active{
 padding-right:6px;
-border-right:4px solid #363435;
-color:#363435;
+border-right:4px solid #ffffff;
+color:#ffffff;
 text-decoration:none;
 }
-	
+
 #linkList li a.c{
 display:inline;
 padding:0 2px 0 0;
@@ -182,10 +191,11 @@ border:0;
 #lresources li a,
 #larchives  li a{
 padding-right:6px;
-border:1px solid #F9F7F6;
-border-right:4px solid #777;
+border:1px solid #101010;
+border-right:4px solid #bbbbbb
+;
 text-decoration:none;
-background:white;
+background:#101010;
 }
 #footer{
 height:60px;

@@ -61,6 +61,8 @@ while True:
     else:
         print "DB failed to connect, attempting Reconnect."
         ScaleDataDB.Reconnect()
+        if ScaleDataDB.Client != None:
+            print "Outputting to " + CfgRW.cfgVars["dbToUse"] + " database " + ScaleDataDB.DBName + " at: " + str(ScaleDataDB.Client.address)
 
     while time.time() - timeOfLastUpdate < secsPerParsist:
         time.sleep(1)
