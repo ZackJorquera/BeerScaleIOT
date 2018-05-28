@@ -16,9 +16,8 @@ echo "alias startscaleaggregator=\"(cd `pwd`/RaspberryPiCode/ScaleAggregator/; p
 echo ". ~/.bashrc"
 . ~/.bashrc
 
-#echo "Adding to /etc/rc.local"
-#echo 'echo "startflaskapp" >> /etc/rc.local'
-#echo 'echo "startscaleaggregator" >> /etc/rc.local'
-#echo "startflaskapp" >> /etc/rc.local
-#echo "startscaleaggregator" >> /etc/rc.local
-
+echo "Adding to /etc/rc.local"
+echo 'echo "cd `pwd`/RaspberryPiCode/FlaskApplication/; python FlaskMain.py" >> /etc/rc.local'
+echo 'echo "cd `pwd`/RaspberryPiCode/ScaleAggregator/; python ScaleAggregator.py" >> /etc/rc.local'
+sudo echo "cd `pwd`/RaspberryPiCode/FlaskApplication/; python FlaskMain.py" >> /etc/rc.local
+sudo echo "cd `pwd`/RaspberryPiCode/ScaleAggregator/; python ScaleAggregator.py" >> /etc/rc.local
