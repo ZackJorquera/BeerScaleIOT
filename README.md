@@ -116,3 +116,6 @@ git pull origin master
 
 ```
 And then reboot the PI.
+```
+sudo reboot
+```
