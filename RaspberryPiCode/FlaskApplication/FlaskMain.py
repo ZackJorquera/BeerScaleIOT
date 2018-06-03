@@ -2,18 +2,21 @@
 
 import math
 import threading
-
-from flask import Flask, render_template, redirect, url_for, request
-
+import os
+import time
+import datetime
 import sys
+
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory
+
 import BokehGraphCreater as GraphCreater
 sys.path.append('../Tools/')
 import ScaleInfoReaderWriter as ScaleIRW
-import MongoReaderWriter as MongoRW
+import DatabaseReaderWriter as DBRW
 import ConfigReaderWriter as CfgRW
-#import MySQLReaderWriter as MySQLRW
 
 
+exportDir = "../Exports"
 
 ScaleDataDB = None
 reconnecting = False
@@ -21,11 +24,12 @@ lock = threading.Lock()
 
 
 def LoadDB():
-    if CfgRW.cfgVars["dbToUse"] == "mongo": # use a switch
-        db = MongoRW.MongoDBProfile()
+    if CfgRW.cfgVars["dbToUse"] == "mongo":
+        db = DBRW.MongoDBProfile()
     else:
-        db = MongoRW.MongoDBProfile()
-        #db = MySQLRW.MySQLDBProfile()
+        db = DBRW.MongoDBProfile()
+        # db = DBRW.MySQLDBProfile()
+    db.Connect()
     return db
 
 
@@ -106,12 +110,53 @@ def CreateScaleGraphFromTimeFrame(num, hours=730):
     return GraphCreater.encodeTOUTF8(html)
 
 
+def ExportScaleGraphFromTimeFrame(num, hours=730):
+    ki = ScaleIRW.ScaleInfo(num)
+    ki.startGPIO()
+    totalScales = ScaleIRW.GetNumOfScales()
+    value = ki.GetValue()
+
+    # Get the data
+    dbNotWorking = False
+    try:
+        if ScaleDataDB.Connected == True:
+            timeFrameData = ScaleDataDB.GetTimeFrameFor(ki, hours)
+        else:
+            raise Exception('GetTimeFrameFor failed')
+    except:
+        dbNotWorking = True
+        ScaleDataDB.Connected = False
+        timeFrameData = {'valueList': list(), 'timeStampList': list()}
+        t = threading.Thread(target=Reconnect)
+        t.start()
+
+    y = timeFrameData['valueList']
+    x = timeFrameData['timeStampList']
+
+    if not os.path.isdir(exportDir):
+        os.makedirs(exportDir)
+    timeStamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d-%H%M%S')
+    exportPath = exportDir + "/" + timeStamp + ".csv"
+
+    FW = open(exportPath, "w")
+
+    FW.write("Secs Ago,Value\n")
+    for i in range(len(x)):
+        FW.write(str(x[i]) + "," + str(y[i]))
+        FW.write("\n")
+    FW.close()
+
+    return send_from_directory(exportDir, timeStamp + ".csv", as_attachment=True)
+
+
 @app.route('/ScaleInfo=<int:num>', methods=['GET', 'POST'])
 def getScale(num):
     if request.method == 'GET':
         return CreateScaleGraphFromTimeFrame(num)
     elif request.method == 'POST':
-        if request.form['_action'] == 'DELETE':
+        if request.form['_action'] == "Export":
+            return ExportScaleGraphFromTimeFrame(num)
+        elif request.form['_action'] == 'DELETE':
             ki = ScaleIRW.ScaleInfo(num)
             ki.Delete()
             return redirect(url_for('home'))
@@ -131,7 +176,9 @@ def getScaleWithTimeFrame(num, hours):
     if request.method == 'GET':
         return CreateScaleGraphFromTimeFrame(num, hours)
     elif request.method == 'POST':
-        if request.form['_action'] == 'DELETE':
+        if request.form['_action'] == "Export":
+            return ExportScaleGraphFromTimeFrame(num, hours)
+        elif request.form['_action'] == 'DELETE':
             ki = ScaleIRW.ScaleInfo(num)
             ki.Delete()
             return redirect(url_for('home'))

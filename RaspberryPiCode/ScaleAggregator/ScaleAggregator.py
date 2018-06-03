@@ -2,18 +2,18 @@ import time
 import sys
 sys.path.append('../Tools/')
 import ScaleInfoReaderWriter as ScaleIRW
-import MongoReaderWriter as MongoRW
+import DatabaseReaderWriter as DBRW
 import ConfigReaderWriter as CfgRW
-#import MySQLReaderWriter as MySQLRW
 
 
 
 def LoadDB():
-    if CfgRW.cfgVars["dbToUse"] == "Mongo": # use a switch
-        db = MongoRW.MongoDBProfile()
+    if CfgRW.cfgVars["dbToUse"] == "Mongo":
+        db = DBRW.MongoDBProfile()
     else:
-        db = MongoRW.MongoDBProfile()
-        # db = MySQLRW.MySQLDBProfile()
+        db = DBRW.MongoDBProfile()
+        # db = DBRW.MySQLDBProfile()
+    db.Connect()
     return db
 
 

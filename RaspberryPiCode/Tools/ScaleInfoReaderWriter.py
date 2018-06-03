@@ -129,6 +129,10 @@ class ScaleInfo:
             b = -1.0 * m * self.EmptyValue
             v = self.__ReadFromPin() * m + b
 
+            if v < -100 or v > 200:  # sometimes the HX711 fails and returns a bad value
+                time.sleep(0.1)
+                v = self.__ReadFromPin() * m + b
+
             if v > 100.0: v = 100.0
             if v < 0.0: v = 0.0
 

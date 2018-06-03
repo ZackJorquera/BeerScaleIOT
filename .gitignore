@@ -104,3 +104,4 @@ ENV/
 .idea
 *.cfg
 *.sif
+*.csv
