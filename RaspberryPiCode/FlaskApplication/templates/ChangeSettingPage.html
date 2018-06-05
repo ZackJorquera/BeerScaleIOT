@@ -21,8 +21,8 @@
                     Use C Quick Pulse: <input name="useCQuickPulse", value="{{  currentUseCQuickPulse  }}"><br />
                     Use Median Of Data: <input name="useMedianOfData", value="{{  currentUseMedianOfData  }}"><br /><br />
 
-                    Aggregator Secs Per Parsist: <input name="aggregatorSecsPerParsist", value="{{  currentAggregatorSecsPerParsist  }}"><br />
-                    Aggregator Loops Of Parsists: <input name="aggregatorLoopsOfParsists", value="{{  currentAggregatorLoopsOfParsists  }}"><br />
+                    Aggregator Secs Per Persist: <input name="aggregatorSecsPerPersist", value="{{  currentAggregatorSecsPerPersist  }}"><br />
+                    Aggregator Loops Of Persists: <input name="aggregatorLoopsOfPersists", value="{{  currentAggregatorLoopsOfPersists  }}"><br />
                     Aggregator Print Pushes: <input name="aggregatorPrintPushes", value="{{  currentAggregatorPrintPushes  }}"><br /><br />
 
                     Database Host Server: <input name="dbHostServer", value="{{  currentDBHostServer  }}"><br />
@@ -30,7 +30,8 @@
                     Database Name: <input name="dbName", value="{{  currentDBName  }}"><br />
                     Database Collection Name: <input name="dbCollectionName", value="{{  currentDBCollectionName  }}"><br />
 
-                <input type="submit" name="submit" value="Set">
+				<input type="submit" name="submit" value="Set">
+				<input type="submit" name="submit" value="Set and Restart">
             </form>
 			<p>Please note that for any change to take effect you need to restart the Pi after you click "Set."</p>
 		</div>

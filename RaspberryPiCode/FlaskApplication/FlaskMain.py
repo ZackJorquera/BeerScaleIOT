@@ -49,7 +49,7 @@ def start():
     return redirect(url_for('home'))
 
 
-@app.route('/Home')
+@app.route('/Home', methods=['GET'])
 def home():
     numOfScales = ScaleIRW.GetNumOfScales()
 
@@ -70,6 +70,12 @@ def home():
     script, div = GraphCreater.GetComponentsFromFig(GraphCreater.CombineFigs('v', horizontalAlignments))
 
     return render_template("HomePage.html", num=numOfScales, plot_script=script, plot_div=div, js_resources=js_resources, css_resources=css_resources)
+
+@app.route('/Home', methods=['POST'])
+def homePost():
+    if request.form["submit"] == "Restart Pi":
+        os.system('sudo reboot')
+    return redirect(url_for('home'))
 
 
 def CreateScaleGraphFromTimeFrame(num, hours=730):
@@ -243,8 +249,8 @@ def changeSettings():
         currentUseCQuickPulse = CfgRW.cfgVars["useCQuickPulse"]
         currentUseMedianOfData = CfgRW.cfgVars["useMedianOfData"]
 
-        currentAggregatorSecsPerParsist = CfgRW.cfgVars["aggregatorSecsPerParsist"]
-        currentAggregatorLoopsOfParsists = CfgRW.cfgVars["aggregatorLoopsOfParsists"]
+        currentAggregatorSecsPerPersist = CfgRW.cfgVars["aggregatorSecsPerPersist"]
+        currentAggregatorLoopsOfPersists = CfgRW.cfgVars["aggregatorLoopsOfPersists"]
         currentAggregatorPrintPushes = CfgRW.cfgVars["aggregatorPrintPushes"]
 
         currentDBHostServer = CfgRW.cfgVars["dbHostServer"]
@@ -253,7 +259,7 @@ def changeSettings():
         currentDBCollectionName = CfgRW.cfgVars["dbCollectionName"]
 
         return render_template("ChangeSettingPage.html", totalNum=totalNum, currentDBToUse=currentDBToUse, currentSimulateData=currentSimulateData, currentUseCQuickPulse=currentUseCQuickPulse,
-                               currentUseMedianOfData=currentUseMedianOfData, currentAggregatorSecsPerParsist=currentAggregatorSecsPerParsist, currentAggregatorLoopsOfParsists=currentAggregatorLoopsOfParsists,
+                               currentUseMedianOfData=currentUseMedianOfData, currentAggregatorSecsPerPersist=currentAggregatorSecsPerPersist, currentAggregatorLoopsOfPersists=currentAggregatorLoopsOfPersists,
                                currentAggregatorPrintPushes=currentAggregatorPrintPushes, currentDBHostServer=currentDBHostServer, currentDBHostPort=currentDBHostPort, currentDBName=currentDBName,
                                currentDBCollectionName=currentDBCollectionName, num=ScaleIRW.GetNumOfScales())
     elif request.method == 'POST':
@@ -261,8 +267,8 @@ def changeSettings():
         CfgRW.cfgVars["simulateData"] = request.form['simulateData']
         CfgRW.cfgVars["useCQuickPulse"] = request.form['useCQuickPulse']
         CfgRW.cfgVars["useMedianOfData"] = request.form['useMedianOfData']
-        CfgRW.cfgVars["aggregatorSecsPerParsist"] = request.form['aggregatorSecsPerParsist']
-        CfgRW.cfgVars["aggregatorLoopsOfParsists"] = request.form['aggregatorLoopsOfParsists']
+        CfgRW.cfgVars["aggregatorSecsPerPersist"] = request.form['aggregatorSecsPerPersist']
+        CfgRW.cfgVars["aggregatorLoopsOfPersists"] = request.form['aggregatorLoopsOfPersists']
         CfgRW.cfgVars["aggregatorPrintPushes"] = request.form['aggregatorPrintPushes']
         CfgRW.cfgVars["dbHostServer"] = request.form['dbHostServer']
         CfgRW.cfgVars["dbHostPort"] = request.form['dbHostPort']
@@ -271,7 +277,10 @@ def changeSettings():
 
         CfgRW.CreateNewCFGFile()
 
+        if request.form["submit"] == "Set and Restart":
+            os.system('sudo reboot')
         return redirect(url_for('home'))
 
+
 if __name__ == "__main__":
-    app.run(threaded=True,host='0.0.0.0')
+    app.run(threaded=True, host='0.0.0.0')

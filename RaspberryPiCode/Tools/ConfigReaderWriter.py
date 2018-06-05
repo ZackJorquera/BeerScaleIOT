@@ -11,8 +11,8 @@ cfgVars = \
     'useCQuickPulse': "true",
     'useMedianOfData': "true",
 
-    'aggregatorSecsPerParsist': "60",
-    'aggregatorLoopsOfParsists': "20",
+    'aggregatorSecsPerPersist': "60",
+    'aggregatorLoopsOfPersists': "20",
     'aggregatorPrintPushes': "false",
 
     'dbHostServer': "localhost",

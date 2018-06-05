@@ -21,18 +21,18 @@ ScaleDataDB = LoadDB()
 
 scaleInfoList = None
 loopOn = 0
-secsPerParsist = int(CfgRW.cfgVars["aggregatorSecsPerParsist"],10) # try catch
-loopsOfParsists = int(CfgRW.cfgVars["aggregatorLoopsOfParsists"],10)
+secsPerPersist = int(CfgRW.cfgVars["aggregatorSecsPerPersist"],10) # try catch
+loopsOfPersists = int(CfgRW.cfgVars["aggregatorLoopsOfPersists"],10)
 timeOfLastUpdate = None
 
-print "Starting Aggregation every " + str(secsPerParsist) + " Second."
+print "Starting Aggregation every " + str(secsPerPersist) + " Second."
 if ScaleDataDB.Client != None:
     print "Outputting to " + CfgRW.cfgVars["dbToUse"] + " database " + ScaleDataDB.DBName + " at: " + str(ScaleDataDB.Client.address)
 
 while True:
     timeOfLastUpdate = time.time()
 
-    if scaleInfoList is None or loopOn > loopsOfParsists or len(scaleInfoList) != ScaleIRW.GetNumOfScales():
+    if scaleInfoList is None or loopOn > loopsOfPersists or len(scaleInfoList) != ScaleIRW.GetNumOfScales():
         scaleInfoList = ScaleIRW.GetListOfScaleInfos()
 
     if ScaleDataDB.Connected:
@@ -49,7 +49,7 @@ while True:
         if CfgRW.cfgVars["aggregatorPrintPushes"].upper() == "TRUE":
             print str(successfulPushes) + " documents successfully added to database" \
                   " with " + str(failedPushes) + " fails. " \
-                  "Waiting " + str(secsPerParsist) + " seconds before next update."
+                  "Waiting " + str(secsPerPersist) + " seconds before next update."
         else:
             if failedPushes > 0:
                 print str(failedPushes) + " documents failed to push to database."
@@ -64,7 +64,7 @@ while True:
         if ScaleDataDB.Client != None:
             print "Outputting to " + CfgRW.cfgVars["dbToUse"] + " database " + ScaleDataDB.DBName + " at: " + str(ScaleDataDB.Client.address)
 
-    while time.time() - timeOfLastUpdate < secsPerParsist:
+    while time.time() - timeOfLastUpdate < secsPerPersist:
         time.sleep(1)
 
     loopOn += 1
