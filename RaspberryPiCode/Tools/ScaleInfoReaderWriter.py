@@ -234,6 +234,13 @@ def GetNumOfScales():
 def AddScaleInfoToFile(type, name, max, units, dataPin, clockPin):
     numScales = GetNumOfScales()
 
+    try:
+        int(dataPin)
+        int(clockPin)
+        float(max)
+    except:
+        return numScales
+
     fr = open(infoFilePath, "r")
     data = fr.readlines()
     fr.close()

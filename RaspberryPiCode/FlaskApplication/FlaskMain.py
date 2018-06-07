@@ -7,7 +7,7 @@ import time
 import datetime
 import sys
 
-from flask import Flask, render_template, redirect, url_for, request, send_from_directory
+from flask import Flask, render_template, redirect, url_for, request, send_from_directory, session
 
 import BokehGraphCreater as GraphCreater
 sys.path.append('../Tools/')
@@ -42,7 +42,8 @@ def Reconnect():
 ScaleDataDB = LoadDB()
 
 app = Flask(__name__)
-
+app.secret_key = "Not Random. Oh Noes"
+# It doesn't matter becuase im not storing passwords or anything
 
 @app.route('/')
 def start():
@@ -201,8 +202,12 @@ def getScaleWithTimeFrame(num, hours):
 
 @app.route('/AddScale')
 def addScale():
+    if 'didFail' not in session:
+        didFail = "False"
+    else:
+        didFail = session.pop('didFail', None)
     num = ScaleIRW.GetNumOfScales()
-    return render_template("AddScale.html", num=num)
+    return render_template("AddScale.html", num=num, didFail=didFail)
 
 
 @app.route('/AddScale<int:num>/Range', methods=['GET', 'POST'])
@@ -235,7 +240,12 @@ def addScalePost():
     DataPin = request.form['DataPin']
     ClockPin = request.form['ClockPin']
 
+    oldNumOfScales = ScaleIRW.GetNumOfScales()
+
     num = ScaleIRW.AddScaleInfoToFile(Type, Name, MaxCapacity, Units, DataPin, ClockPin)
+    if oldNumOfScales == ScaleIRW.GetNumOfScales():
+        session['didFail'] = "True"
+        return redirect(url_for('addScale'))
     return redirect(url_for('setScaleRange', num=num))
 
 
@@ -258,11 +268,22 @@ def changeSettings():
         currentDBName = CfgRW.cfgVars["dbName"]
         currentDBCollectionName = CfgRW.cfgVars["dbCollectionName"]
 
+        if 'didFail' not in session:
+            didFail = "False"
+        else:
+            didFail = session.pop('didFail', None)
+
         return render_template("ChangeSettingPage.html", totalNum=totalNum, currentDBToUse=currentDBToUse, currentSimulateData=currentSimulateData, currentUseCQuickPulse=currentUseCQuickPulse,
                                currentUseMedianOfData=currentUseMedianOfData, currentAggregatorSecsPerPersist=currentAggregatorSecsPerPersist, currentAggregatorLoopsOfPersists=currentAggregatorLoopsOfPersists,
                                currentAggregatorPrintPushes=currentAggregatorPrintPushes, currentDBHostServer=currentDBHostServer, currentDBHostPort=currentDBHostPort, currentDBName=currentDBName,
-                               currentDBCollectionName=currentDBCollectionName, num=ScaleIRW.GetNumOfScales())
+                               currentDBCollectionName=currentDBCollectionName, num=ScaleIRW.GetNumOfScales(), didFail=didFail)
     elif request.method == 'POST':
+        try:
+            int(request.form['aggregatorSecsPerPersist'])
+            int(request.form['aggregatorLoopsOfPersists'])
+        except:
+            session['didFail'] = "True"
+            return redirect(url_for('changeSettings'))
         CfgRW.cfgVars["dbToUse"] = request.form['dbToUse']
         CfgRW.cfgVars["simulateData"] = request.form['simulateData']
         CfgRW.cfgVars["useCQuickPulse"] = request.form['useCQuickPulse']
