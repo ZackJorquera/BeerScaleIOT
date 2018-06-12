@@ -45,7 +45,7 @@ def CreateGauge(percentage, scaleInfo):
 
 
 def CombineFigs(alignment='h', *args, **kwargs):
-    if(alignment == 'h'):#h is horizontal
+    if alignment == 'h':  # h is horizontal
         allFigs = row(*args)
     else:
         allFigs = column(*args)
@@ -64,12 +64,12 @@ def CreatePlot(x, y, scaleInfo, dbNotWorking = False, minTimeSecs = 60 * 60, wit
         time = 0
     if time < minTimeSecs: time = minTimeSecs
 
-    if time > 5 * (60 * 60 * 24 * 30.41):  # 5 months
+    if time > 3 * (60 * 60 * 24 * 30.41):  # 3 months
         timeScale = "Months"
         for i in range(len(x)):
             x[i] = x[i] / (60 * 60 * 24 * 30.41)
         time = time / (60 * 60 * 24 * 30.41)
-    elif time > 5 * (60 * 60 * 24):  # 5 days
+    elif time > 4 * (60 * 60 * 24):  # 4 days
         timeScale = "Days"
         for i in range(len(x)):
             x[i] = x[i] / (60 * 60 * 24)
@@ -80,7 +80,7 @@ def CreatePlot(x, y, scaleInfo, dbNotWorking = False, minTimeSecs = 60 * 60, wit
             x[i] = x[i] / (60 * 60)
         time = time / (60 * 60)
     else:
-        timeScale = "Mins"
+        timeScale = "Minutes"
         for i in range(len(x)):
             x[i] = x[i] / (60)
         time = time / 60
@@ -93,12 +93,12 @@ def CreatePlot(x, y, scaleInfo, dbNotWorking = False, minTimeSecs = 60 * 60, wit
 
     graphFig = figure(title="History Graph for Scale " + str(scaleInfo.Num) + ": " + scaleInfo.Name,
                       plot_width=600, plot_height=600, tools=[hover])
-    graphFig.yaxis[0].axis_label = 'Precent Full'
+    graphFig.yaxis[0].axis_label = 'Percent Full'
     graphFig.xaxis[0].axis_label = timeScale + ' Ago'
     graphFig.toolbar_location = None
 
     graphFig.x_range = Range1d(time, -1 * (time/20.0))
-    graphFig.y_range = Range1d(0, 110)
+    graphFig.y_range = Range1d(0, 103)
 
     graphFig.border_fill_color = "#101010"
     graphFig.background_fill_color = "#333333"
@@ -121,5 +121,5 @@ def CreatePlot(x, y, scaleInfo, dbNotWorking = False, minTimeSecs = 60 * 60, wit
     return graphFig
 
 
-def encodeTOUTF8(html):
+def encodeToUTF8(html):
     return encode_utf8(html)

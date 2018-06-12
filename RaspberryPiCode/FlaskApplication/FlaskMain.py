@@ -9,7 +9,7 @@ import sys
 
 from flask import Flask, render_template, redirect, url_for, request, send_from_directory, session
 
-import BokehGraphCreater as GraphCreater
+import BokehGraphCreator as GraphCreater
 sys.path.append('../Tools/')
 import ScaleInfoReaderWriter as ScaleIRW
 import DatabaseReaderWriter as DBRW
@@ -81,9 +81,24 @@ def homePost():
 
 def CreateScaleGraphFromTimeFrame(num, hours=730):
     ki = ScaleIRW.ScaleInfo(num)
-    ki.startGPIO()
+
+    didFail = "False"
+    failMsg = "None"
+
+    if 'failMsg' in session:
+        failMsg = session.pop('failMsg', None)
+        didFail = "True"
+
+    if not ki.Failed:
+        ki.startGPIO()
+        value = ki.GetValue()
+    else:
+        if failMsg == "None":
+            failMsg = "An error occurred while loading scale info."
+        value = 0
+        didFail = "True"
+
     totalScales = ScaleIRW.GetNumOfScales()
-    value = ki.GetValue()
 
     # Get the data
     dbNotWorking = False
@@ -110,20 +125,22 @@ def CreateScaleGraphFromTimeFrame(num, hours=730):
     script, div = GraphCreater.GetComponentsFromFig(GraphCreater.CombineFigs('v', gfig, pfig))
 
     html = render_template("ScaleInfo.html", num=num, type=ki.Type, name=ki.Name,
-                           unit=ki.Units,
+                           unit=ki.Units, didFail=didFail, failMsg=failMsg,
                            totalNum=totalScales, plot_script=script, plot_div=div,
                            js_resources=js_resources, css_resources=css_resources)
 
-    return GraphCreater.encodeTOUTF8(html)
+    return GraphCreater.encodeToUTF8(html)
 
 
 def ExportScaleGraphFromTimeFrame(num, hours=730):
     ki = ScaleIRW.ScaleInfo(num)
-    ki.startGPIO()
-    totalScales = ScaleIRW.GetNumOfScales()
-    value = ki.GetValue()
+    if ki.Failed:
+        session['failMsg'] = "An error occurred while loading scale info."
+        if hours == 730:
+            return redirect(url_for('getScale', num))
+        else:
+            return redirect(url_for('getScaleWithTimeFrame', num, hours))
 
-    # Get the data
     dbNotWorking = False
     try:
         if ScaleDataDB.Connected == True:
@@ -133,9 +150,11 @@ def ExportScaleGraphFromTimeFrame(num, hours=730):
     except:
         dbNotWorking = True
         ScaleDataDB.Connected = False
-        timeFrameData = {'valueList': list(), 'timeStampList': list()}
-        t = threading.Thread(target=Reconnect)
-        t.start()
+        session['failMsg'] = "An error occurred while exporting historical data."
+        if hours == 730:
+            return redirect(url_for('getScale', num))
+        else:
+            return redirect(url_for('getScaleWithTimeFrame', num, hours))
 
     y = timeFrameData['valueList']
     x = timeFrameData['timeStampList']
@@ -173,6 +192,11 @@ def getScale(num):
             return redirect(url_for('getScaleWithTimeFrame', num=num, hours=(24*7)))
         elif request.form['_action'] == 'ShowHoursAgo':
             h = request.form['HoursAgo']
+            try:
+                int(h)
+            except:
+                session['failMsg'] = "An error occurred while processing your input."
+                return redirect(url_for('getScale', num=num))
             return redirect(url_for('getScaleWithTimeFrame', num=num, hours=h))
         elif request.form['_action'] == 'ShowDefault':
             return redirect(url_for('getScale', num=num))
@@ -195,6 +219,11 @@ def getScaleWithTimeFrame(num, hours):
             return redirect(url_for('getScaleWithTimeFrame', num=num, hours=(24*7)))
         elif request.form['_action'] == 'ShowHoursAgo':
             h = request.form['HoursAgo']
+            try:
+                int(h)
+            except:
+                session['failMsg'] = "An error occurred while processing your input."
+                return redirect(url_for('getScaleWithTimeFrame', num=num, hours=hours))
             return redirect(url_for('getScaleWithTimeFrame', num=num, hours=h))
         elif request.form['_action'] == 'ShowDefault':
             return redirect(url_for('getScale', num=num))
@@ -202,12 +231,14 @@ def getScaleWithTimeFrame(num, hours):
 
 @app.route('/AddScale')
 def addScale():
-    if 'didFail' not in session:
+    if 'failMsg' not in session:
         didFail = "False"
+        failMsg = "None"
     else:
-        didFail = session.pop('didFail', None)
+        didFail = "True"
+        failMsg = session.pop('failMsg', None)
     num = ScaleIRW.GetNumOfScales()
-    return render_template("AddScale.html", num=num, didFail=didFail)
+    return render_template("AddScale.html", num=num, didFail=didFail, failMsg=failMsg)
 
 
 @app.route('/AddScale<int:num>/Range', methods=['GET', 'POST'])
@@ -244,7 +275,7 @@ def addScalePost():
 
     num = ScaleIRW.AddScaleInfoToFile(Type, Name, MaxCapacity, Units, DataPin, ClockPin)
     if oldNumOfScales == ScaleIRW.GetNumOfScales():
-        session['didFail'] = "True"
+        session['failMsg'] = "An error occurred while processing your input."
         return redirect(url_for('addScale'))
     return redirect(url_for('setScaleRange', num=num))
 
@@ -268,21 +299,23 @@ def changeSettings():
         currentDBName = CfgRW.cfgVars["dbName"]
         currentDBCollectionName = CfgRW.cfgVars["dbCollectionName"]
 
-        if 'didFail' not in session:
+        if 'failMsg' not in session:
             didFail = "False"
+            failMsg = "None"
         else:
-            didFail = session.pop('didFail', None)
+            didFail = "True"
+            failMsg = session.pop('failMsg', None)
 
         return render_template("ChangeSettingPage.html", totalNum=totalNum, currentDBToUse=currentDBToUse, currentSimulateData=currentSimulateData, currentUseCQuickPulse=currentUseCQuickPulse,
                                currentUseMedianOfData=currentUseMedianOfData, currentAggregatorSecsPerPersist=currentAggregatorSecsPerPersist, currentAggregatorLoopsOfPersists=currentAggregatorLoopsOfPersists,
                                currentAggregatorPrintPushes=currentAggregatorPrintPushes, currentDBHostServer=currentDBHostServer, currentDBHostPort=currentDBHostPort, currentDBName=currentDBName,
-                               currentDBCollectionName=currentDBCollectionName, num=ScaleIRW.GetNumOfScales(), didFail=didFail)
+                               currentDBCollectionName=currentDBCollectionName, num=ScaleIRW.GetNumOfScales(), didFail=didFail, failMsg=failMsg)
     elif request.method == 'POST':
         try:
             int(request.form['aggregatorSecsPerPersist'])
             int(request.form['aggregatorLoopsOfPersists'])
         except:
-            session['didFail'] = "True"
+            session['failMsg'] = "An error occurred while processing your input."
             return redirect(url_for('changeSettings'))
         CfgRW.cfgVars["dbToUse"] = request.form['dbToUse']
         CfgRW.cfgVars["simulateData"] = request.form['simulateData']

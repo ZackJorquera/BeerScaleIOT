@@ -9,7 +9,7 @@
 <body>
 {% if didFail == "True" %}
 	<div id="banner">
-		<p id="bannerText">An error occurred while processing your input.</p>
+		<p id="bannerText">{{ failMsg }}</p>
     	<div id="close" onclick="myFunction()">&times;</div>
 	</div>
 

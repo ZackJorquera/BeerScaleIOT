@@ -230,6 +230,7 @@ body {
     height:30px;
     width: 100%;
     background: #DD920C;
+    z-index: 1000;
 }
 
 #close {

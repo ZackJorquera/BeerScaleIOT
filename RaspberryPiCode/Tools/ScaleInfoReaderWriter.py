@@ -33,9 +33,20 @@ class ScaleInfo:
         self.FullValue = 100
         self.Num = num
 
-        if num <= GetNumOfScales():
-            self.__GetDataForScale()
+        self.Failed = False
 
+        try:
+            if num <= GetNumOfScales():
+                self.__GetDataForScale()
+            else:
+                raise IndexError()
+        except:
+            self.Failed = True
+            self.MaxCapacity = 0.0
+            self.DataPin = 0
+            self.ClockPin = 0
+            self.EmptyValue = 0
+            self.FullValue = 100
 
     def startGPIO(self):
         if CfgRW.cfgVars["simulateData"].upper() != "TRUE":

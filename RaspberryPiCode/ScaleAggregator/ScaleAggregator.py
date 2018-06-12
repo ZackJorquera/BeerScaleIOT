@@ -41,6 +41,8 @@ while True:
 
         for si in scaleInfoList:
             try:
+                if si.Failed:
+                    raise Exception()
                 ScaleDataDB.Write(si, (si.GetValue() * 100)) # There is a Write Function for both the MySQLRW and MongoRW classes
                 successfulPushes += 1
             except:

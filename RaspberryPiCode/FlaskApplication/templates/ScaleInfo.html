@@ -11,6 +11,20 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+{% if didFail == "True" %}
+	<div id="banner">
+		<p id="bannerText">{{ failMsg }}</p>
+    	<div id="close" onclick="myFunction()">&times;</div>
+	</div>
+
+	<script>
+		function myFunction() {
+			var x = document.getElementById("banner");
+			x.style.display = "none";
+		}
+	</script>
+{% endif %}
+
 <div id="container">
 	<div id="intro">
 		<div id="pageHeaderTwo">
