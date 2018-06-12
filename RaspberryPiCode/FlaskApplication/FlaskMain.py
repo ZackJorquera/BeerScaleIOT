@@ -76,6 +76,8 @@ def home():
 def homePost():
     if request.form["submit"] == "Restart Pi":
         os.system('sudo reboot')
+    if request.form["submit"] == "Start ScaleAggregator":
+        os.system("(cd ../ScaleAggregator/; python ScaleAggregator.py &)")
     return redirect(url_for('home'))
 
 
@@ -333,8 +335,6 @@ def changeSettings():
 
         if request.form["submit"] == "Set and Restart":
             os.system('sudo reboot')
-        if request.form["submit"] == "Start ScaleAggregator":
-            os.system("(cd ../ScaleAggregator/; python ScaleAggregator.py &)")
         return redirect(url_for('home'))
 
 
