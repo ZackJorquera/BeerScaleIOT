@@ -292,6 +292,8 @@ def changeSettings():
         currentUseCQuickPulse = CfgRW.cfgVars["useCQuickPulse"]
         currentUseMedianOfData = CfgRW.cfgVars["useMedianOfData"]
 
+        launchScaleAggregatorOnStart = CfgRW.cfgVars["launchScaleAggregatorOnStart"]
+
         currentAggregatorSecsPerPersist = CfgRW.cfgVars["aggregatorSecsPerPersist"]
         currentAggregatorLoopsOfPersists = CfgRW.cfgVars["aggregatorLoopsOfPersists"]
         currentAggregatorPrintPushes = CfgRW.cfgVars["aggregatorPrintPushes"]
@@ -311,7 +313,7 @@ def changeSettings():
         return render_template("ChangeSettingPage.html", totalNum=totalNum, currentDBToUse=currentDBToUse, currentSimulateData=currentSimulateData, currentUseCQuickPulse=currentUseCQuickPulse,
                                currentUseMedianOfData=currentUseMedianOfData, currentAggregatorSecsPerPersist=currentAggregatorSecsPerPersist, currentAggregatorLoopsOfPersists=currentAggregatorLoopsOfPersists,
                                currentAggregatorPrintPushes=currentAggregatorPrintPushes, currentDBHostServer=currentDBHostServer, currentDBHostPort=currentDBHostPort, currentDBName=currentDBName,
-                               currentDBCollectionName=currentDBCollectionName, num=ScaleIRW.GetNumOfScales(), didFail=didFail, failMsg=failMsg)
+                               currentDBCollectionName=currentDBCollectionName, num=ScaleIRW.GetNumOfScales(), didFail=didFail, failMsg=failMsg, currentLaunchScaleAggregatorOnStart=launchScaleAggregatorOnStart)
     elif request.method == 'POST':
         try:
             int(request.form['aggregatorSecsPerPersist'])
@@ -323,6 +325,7 @@ def changeSettings():
         CfgRW.cfgVars["simulateData"] = request.form['simulateData']
         CfgRW.cfgVars["useCQuickPulse"] = request.form['useCQuickPulse']
         CfgRW.cfgVars["useMedianOfData"] = request.form['useMedianOfData']
+        CfgRW.cfgVars["launchScaleAggregatorOnStart"] = request.form['launchScaleAggregatorOnStart']
         CfgRW.cfgVars["aggregatorSecsPerPersist"] = request.form['aggregatorSecsPerPersist']
         CfgRW.cfgVars["aggregatorLoopsOfPersists"] = request.form['aggregatorLoopsOfPersists']
         CfgRW.cfgVars["aggregatorPrintPushes"] = request.form['aggregatorPrintPushes']
@@ -339,4 +342,6 @@ def changeSettings():
 
 
 if __name__ == "__main__":
+    if CfgRW.cfgVars["launchScaleAggregatorOnStart"].upper() == "TRUE":
+        os.system("(cd ../ScaleAggregator/; python ScaleAggregator.py &)")
     app.run(threaded=True, host='0.0.0.0')

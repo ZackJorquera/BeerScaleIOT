@@ -20,4 +20,4 @@ echo "Adding to /etc/rc.local"
 echo 'echo "cd `pwd`/RaspberryPiCode/FlaskApplication/; python FlaskMain.py" >> /etc/rc.local'
 echo 'echo "cd `pwd`/RaspberryPiCode/ScaleAggregator/; python ScaleAggregator.py" >> /etc/rc.local'
 sudo echo "cd `pwd`/RaspberryPiCode/FlaskApplication/; python FlaskMain.py" >> /etc/rc.local
-sudo echo "cd `pwd`/RaspberryPiCode/ScaleAggregator/; python ScaleAggregator.py" >> /etc/rc.local
+#sudo echo "cd `pwd`/RaspberryPiCode/ScaleAggregator/; python ScaleAggregator.py" >> /etc/rc.local

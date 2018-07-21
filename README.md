@@ -30,6 +30,8 @@ The first thing that you need to do is put an operating system on to the SD card
 
 Download the latest version of [Rasbian](https://www.raspberrypi.org/downloads/raspbian/) (I'm getting version 4.14) and an [IOS Burner](https://etcher.io/). Open the IOS Burner, plug in the micro SD card and burn the image to the sd card. Put the sd card with the burnt image into the pi and turn on the pi.
 
+It might have you go through some install steps like setting up the wifi; if it does, do them.
+
 Raspian is pre-loaded with a lot of bloatware, you can remove it by pasting the following into the Linux terminal.
 ```
 sudo apt-get remove --purge wolfram-engine libreoffice* scratch minecraft-pi sonic-pi dillo gpicview oracle-java8-jdk openjdk-7-jre oracle-java7-jdk openjdk-8-jre geany -y
@@ -49,7 +51,7 @@ sudo pip install statistics
 sudo pip install --upgrade RPi.GPIO
 
 ```
-Additionally, the bcm2835 also need to be installed in order for the QuickPulse.c script to work.
+Additionally, the bcm2835 C library also needs to be installed in order for the QuickPulse.c script to work.
 ```
 cd /home/pi/Downloads
 wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.55.tar.gz
@@ -61,7 +63,7 @@ sudo make check
 sudo make install
 
 ```
-And then finally, you can download the source code.
+And then finally, you can download the source code for ScaleLiquidRemainingIOT.
 ```
 cd /home/pi/Documents
 git clone https://github.com/ZackJorquera/ScaleLiquidRemainingIOT.git
@@ -71,18 +73,39 @@ And run the setup.sh script
 ```
 sudo bash setup.sh
 ```
+We are almost done, there is only one last thing to do that the setup script could not. In the file /etc/rc.local you need to move the line that says 'exit 0' to the end of the file.
+There should be a line that setup.sh put at the end of the file, after the 'exit 0', you need to put it before the 'exit 0'. To open the file use basically any text editor you like, I like vim, although, if you are not familiar with vim use leafpad. Note that leafpad is a GUI application so you have to be on the pi and not using ssh.
+```
+sudo vim /etc/rc.local
+```
+or
+```
+sudo leafpad /etc/rc.local
+```
+Ok, you should be done. On restart, the flask app should start and be available to view. How to do that is in the RUN section.
+
+##### Browser
+Additionally, If you want a browser I would recommend the supper lightweight [midori](http://midori-browser.org/).
+```
+sudo apt-get install midori
+```
+
 
 ##### SSH
-You can and should set up ssh to be able to connect to the pi from an external computer. Because the default version in raspbian does not work you will have to reinstall it.
+You can and should set up ssh to be able to connect to the pi from an external computer. Because the default version of ssh-server on some versions of raspbian does not work, you will have to reinstall it.
 ```
 sudo apt-get install --reinstall openssh-server
+```
+Also, in newer releases of raspbian ssh is not enabled, so you will need to enable it
+```
+sudo systemctl enable ssh
+sudo systemctl start ssh
 ```
 To connect to the pi with ssh use [PuTTY](https://www.putty.org/) if you are on windows, or run the following command for Linux or macOS
 ```
 ssh pi@<ip address of the pi>
 ```
 Use 'raspberry' as the password. You might need to [create an ssh key](https://confluence.atlassian.com/bitbucketserver/creating-ssh-keys-776639788.html) if you haven't already.
-
 
 ### The HX711 Chip
 The first thing to do is solder female headers on to the VDD, VCC, DAT, CLK, and GND points for easy connection with Female-Male jumpers to the Raspberry Pi. You can also use Male headers with Female-Female jumpers if you want.
@@ -93,7 +116,7 @@ https://learn.sparkfun.com/tutorials/getting-started-with-load-cells?_ga=2.21114
 https://learn.sparkfun.com/tutorials/load-cell-amplifier-hx711-breakout-hookup-guide
 
 ## Run
-If everything was set up properly then both the flask app and the aggregator should launch when you call their aliases. Use ```ifconfig``` to get the IP address of the pi (eth0 for ethernet and wlan0 for wireless), this is what you use for the URL to the flask web site. The flask app should be at ```http://<ip address of the pi>:5000/```
+If everything was set up properly then both the flask app and the aggregator should launch when you call their aliases. Use ```ip addr``` to get the IP address of the pi (eth0 for ethernet and wlan0 for wireless), this is what you use for the URL to the flask web site. The flask app should be at ```http://<ip address of the pi>:5000/```
 If you want to have everything run on startup you must open the file /etc/rc.local and move the exit call to before the two lines of code that run the two programs.
 
 ## Use

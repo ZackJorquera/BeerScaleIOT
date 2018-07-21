@@ -11,6 +11,8 @@ cfgVars = \
     'useCQuickPulse': "true",
     'useMedianOfData': "true",
 
+    'launchScaleAggregatorOnStart': "true",
+
     'aggregatorSecsPerPersist': "60",
     'aggregatorLoopsOfPersists': "20",
     'aggregatorPrintPushes': "false",
