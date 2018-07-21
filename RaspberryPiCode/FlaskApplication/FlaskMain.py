@@ -3,6 +3,7 @@
 import math
 import threading
 import os
+import subprocess
 import time
 import datetime
 import sys
@@ -99,7 +100,7 @@ def homePost():
 
 def GetPIDOfScaleAggregator():
     try:
-        output = os.system("ps ax | grep ScaleAggregator.py")
+        output = subprocess.check_output("ps ax | grep ScaleAggregator.py", shell=True)
         output = output.strip()
         PID = output.split(' ')[0]
         return PID
