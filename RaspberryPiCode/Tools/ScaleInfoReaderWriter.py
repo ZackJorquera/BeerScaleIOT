@@ -153,13 +153,14 @@ class ScaleInfo:
 
     def __ReadFromPin(self):
         if CfgRW.cfgVars["simulateData"].upper() == "TRUE":
+            repeats = int(CfgRW.cfgVars["loadSamplesPerRead"])
             return (math.sin(3 * math.pi * (time.time() - 1516000000) / 88000 + self.Num) * (50 / 2) +
                     math.sin(2 * math.pi * (time.time() - 1516000000) / 88000 + self.Num) * (50 / 2) + 50)
         else:
             GPIO.output(self.ClockPin, GPIO.LOW)  # power on
             #time.sleep(0.000001)
 
-            repeats = 10
+            repeats = int(CfgRW.cfgVars["loadSamplesPerRead"])
             totalVals = list()
             for repeat in range(repeats):
                 dataBits = [0,0,0]

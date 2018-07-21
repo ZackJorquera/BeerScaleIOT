@@ -70,7 +70,16 @@ def home():
 
     script, div = GraphCreater.GetComponentsFromFig(GraphCreater.CombineFigs('v', horizontalAlignments))
 
-    return render_template("HomePage.html", num=numOfScales, plot_script=script, plot_div=div, js_resources=js_resources, css_resources=css_resources)
+    scaleAggregatorPID = GetPIDOfScaleAggregator()
+    scaleAggregatorIsRunning = False
+    try:
+        if scaleAggregatorPID != None:
+            scaleAggregatorIsRunning = os.path.exists("/proc/" + scaleAggregatorPID)
+    except:
+        scaleAggregatorIsRunning = False
+
+    return render_template("HomePage.html", num=numOfScales, plot_script=script, plot_div=div, js_resources=js_resources, css_resources=css_resources,
+                           scaleAggregatorIsRunning=scaleAggregatorIsRunning)
 
 @app.route('/Home', methods=['POST'])
 def homePost():
@@ -78,7 +87,24 @@ def homePost():
         os.system('sudo reboot')
     if request.form["submit"] == "Start ScaleAggregator":
         os.system("(cd ../ScaleAggregator/; python ScaleAggregator.py &)")
+    if request.form["submit"] == "Stop ScaleAggregator":
+        try:
+            PID = GetPIDOfScaleAggregator()
+            os.system("sudo kill " + PID)
+        except:
+            pass
+
     return redirect(url_for('home'))
+
+
+def GetPIDOfScaleAggregator():
+    try:
+        output = os.system("ps ax | grep ScaleAggregator.py")
+        output = output.strip()
+        PID = output.split(' ')[0]
+        return PID
+    except:
+        return None
 
 
 def CreateScaleGraphFromTimeFrame(num, hours=730):
@@ -291,8 +317,9 @@ def changeSettings():
         currentSimulateData = CfgRW.cfgVars["simulateData"]
         currentUseCQuickPulse = CfgRW.cfgVars["useCQuickPulse"]
         currentUseMedianOfData = CfgRW.cfgVars["useMedianOfData"]
+        currentLoadSamplesPerRead = CfgRW.cfgVars["loadSamplesPerRead"]
 
-        launchScaleAggregatorOnStart = CfgRW.cfgVars["launchScaleAggregatorOnStart"]
+        currentLaunchScaleAggregatorOnStart = CfgRW.cfgVars["launchScaleAggregatorOnStart"]
 
         currentAggregatorSecsPerPersist = CfgRW.cfgVars["aggregatorSecsPerPersist"]
         currentAggregatorLoopsOfPersists = CfgRW.cfgVars["aggregatorLoopsOfPersists"]
@@ -313,11 +340,13 @@ def changeSettings():
         return render_template("ChangeSettingPage.html", totalNum=totalNum, currentDBToUse=currentDBToUse, currentSimulateData=currentSimulateData, currentUseCQuickPulse=currentUseCQuickPulse,
                                currentUseMedianOfData=currentUseMedianOfData, currentAggregatorSecsPerPersist=currentAggregatorSecsPerPersist, currentAggregatorLoopsOfPersists=currentAggregatorLoopsOfPersists,
                                currentAggregatorPrintPushes=currentAggregatorPrintPushes, currentDBHostServer=currentDBHostServer, currentDBHostPort=currentDBHostPort, currentDBName=currentDBName,
-                               currentDBCollectionName=currentDBCollectionName, num=ScaleIRW.GetNumOfScales(), didFail=didFail, failMsg=failMsg, currentLaunchScaleAggregatorOnStart=launchScaleAggregatorOnStart)
+                               currentDBCollectionName=currentDBCollectionName, num=ScaleIRW.GetNumOfScales(), didFail=didFail, failMsg=failMsg, currentLaunchScaleAggregatorOnStart=currentLaunchScaleAggregatorOnStart,
+                               currentLoadSamplesPerRead=currentLoadSamplesPerRead)
     elif request.method == 'POST':
         try:
             int(request.form['aggregatorSecsPerPersist'])
             int(request.form['aggregatorLoopsOfPersists'])
+            int(request.form['loadSamplesPerRead'])
         except:
             session['failMsg'] = "An error occurred while processing your input."
             return redirect(url_for('changeSettings'))
@@ -325,6 +354,7 @@ def changeSettings():
         CfgRW.cfgVars["simulateData"] = request.form['simulateData']
         CfgRW.cfgVars["useCQuickPulse"] = request.form['useCQuickPulse']
         CfgRW.cfgVars["useMedianOfData"] = request.form['useMedianOfData']
+        CfgRW.cfgVars["loadSamplesPerRead"] = request.form['loadSamplesPerRead']
         CfgRW.cfgVars["launchScaleAggregatorOnStart"] = request.form['launchScaleAggregatorOnStart']
         CfgRW.cfgVars["aggregatorSecsPerPersist"] = request.form['aggregatorSecsPerPersist']
         CfgRW.cfgVars["aggregatorLoopsOfPersists"] = request.form['aggregatorLoopsOfPersists']
