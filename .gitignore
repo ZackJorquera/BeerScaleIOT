@@ -105,3 +105,4 @@ ENV/
 *.cfg
 *.sif
 *.csv
+*.txt

@@ -7,6 +7,7 @@ import subprocess
 import time
 import datetime
 import sys
+import logging
 
 from flask import Flask, render_template, redirect, url_for, request, send_from_directory, session
 
@@ -18,6 +19,8 @@ import ConfigReaderWriter as CfgRW
 
 
 exportDir = "../Exports"
+logDir = "../Log"
+logFile = "Log.txt"
 
 ScaleDataDB = None
 reconnecting = False
@@ -53,6 +56,13 @@ def start():
 
 @app.route('/Home', methods=['GET'])
 def home():
+    didFail = "False"
+    failMsg = "None"
+
+    if 'failMsg' in session:
+        failMsg = session.pop('failMsg', None)
+        didFail = "True"
+
     numOfScales = ScaleIRW.GetNumOfScales()
 
     js_resources, css_resources = GraphCreater.GetStaticResources()
@@ -80,7 +90,7 @@ def home():
         scaleAggregatorIsRunning = False
 
     return render_template("HomePage.html", num=numOfScales, plot_script=script, plot_div=div, js_resources=js_resources, css_resources=css_resources,
-                           scaleAggregatorIsRunning=scaleAggregatorIsRunning)
+                           scaleAggregatorIsRunning=scaleAggregatorIsRunning, didFail=didFail, failMsg=failMsg)
 
 @app.route('/Home', methods=['POST'])
 def homePost():
@@ -94,8 +104,22 @@ def homePost():
             os.system("sudo kill " + PID)
         except:
             pass
-
-    return redirect(url_for('home'))
+    if request.form["submit"] == "Download Log File":
+        try:
+            return send_from_directory(logDir, logFile, as_attachment=True)
+        except Exception as error:
+            app.logger.error("An error occurred while trying to export the log. Exception: " + str(error))
+            session['failMsg'] = "An error occurred while trying to export the log."
+            return redirect(url_for('home'))
+    if request.form["submit"] == "Delete Log File":
+        try:
+            closeLoggerHandlers()
+            DeleteLogFile()
+            app.logger.addHandler(createHandler())
+        except Exception as error:
+            app.logger.error("An error occurred while trying to delete the log. Exception: " + str(error))
+            session['failMsg'] = "An error occurred while trying to delete the log file. Close all other programs that log to the log file and try again."
+        return redirect(url_for('home'))
 
 
 def GetPIDOfScaleAggregator():
@@ -372,7 +396,36 @@ def changeSettings():
         return redirect(url_for('home'))
 
 
+def LogFilePath():
+    return logDir + "/" + logFile
+
+
+def DeleteLogFile():
+    os.remove(LogFilePath())
+
+
+def closeLoggerHandlers():
+    for handler in app.logger.handlers:
+        handler.close()
+        app.logger.removeHandler(handler)
+
+def createHandler():
+    file_handler = logging.FileHandler(LogFilePath())
+    file_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(levelname)s\t%(asctime)s \t%(message)s')
+    file_handler.setFormatter(formatter)
+    return file_handler
+
+
 if __name__ == "__main__":
     if CfgRW.cfgVars["launchScaleAggregatorOnStart"].upper() == "TRUE":
         os.system("(cd ../ScaleAggregator/; python ScaleAggregator.py &)")
+
+    if not app.debug:
+        if not os.path.exists(logDir):
+            os.makedirs(logDir)
+        file_handler = createHandler()
+        app.logger.setLevel(logging.DEBUG)
+        app.logger.addHandler(file_handler)
+
     app.run(threaded=True, host='0.0.0.0')
