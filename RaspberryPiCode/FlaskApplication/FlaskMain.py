@@ -112,13 +112,13 @@ def homePost():
             session['failMsg'] = "An error occurred while trying to export the log."
             return redirect(url_for('home'))
     if request.form["submit"] == "Delete Log File":
+        closeLoggerHandlers()
         try:
-            closeLoggerHandlers()
             DeleteLogFile()
-            app.logger.addHandler(createHandler())
         except Exception as error:
             app.logger.error("An error occurred while trying to delete the log. Exception: " + str(error))
             session['failMsg'] = "An error occurred while trying to delete the log file. Close all other programs that log to the log file and try again."
+        app.logger.addHandler(createHandler())
         return redirect(url_for('home'))
 
 
