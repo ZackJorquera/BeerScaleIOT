@@ -3,18 +3,18 @@ import time
 import math
 import statistics
 import ConfigReaderWriter as CfgRW
-#from QuickPulse import *
-#import RPi.GPIO as GPIO
+from QuickPulse import *
+import RPi.GPIO as GPIO
 
 
-#GPIO.setwarnings(False)  # find a better way
+GPIO.setwarnings(False)  # find a better way
 
 infoFilePath = "../ScaleInfoFile.SIF"  # the file directory is still where FlaskMain is and not at this programs file location
 #simulateData = CfgRW.cfgVars["simulateData"]
 #useCQuickPulse = CfgRW.cfgVars["useCQuickPulse"]
 #useMedian = CfgRW.cfgVars["useMedianOfData"]
 
-#GPIO.setmode(GPIO.BCM)
+GPIO.setmode(GPIO.BCM)
 
 
 class ScaleInfo:
