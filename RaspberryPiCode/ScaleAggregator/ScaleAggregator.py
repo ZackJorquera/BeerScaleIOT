@@ -87,7 +87,8 @@ while True:
 
         if successfulPushes == 0 and len(scaleInfoList) != 0:
             printAndLog("DB failed to push, attempting Reconnect.", logging.ERROR)
-            ScaleDataDB.Reconnect()
+            if(ScaleDataDB.Reconnect()):
+                printAndLog("Successfully reconnected to " + CfgRW.cfgVars["dbToUse"] + " database " + ScaleDataDB.DBName + " at: " + str(ScaleDataDB.Client.address), logging.INFO)
 
     else:
         printAndLog("DB failed to connect, attempting Reconnect.", logging.ERROR)
