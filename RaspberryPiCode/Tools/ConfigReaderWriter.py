@@ -10,6 +10,7 @@ cfgVars = \
     'simulateData': "false",
     'useCQuickPulse': "true",
     'useMedianOfData': "true",
+    'uselatestFromMongoAsCurrent': "false",
     'loadSamplesPerRead': "10",
 
     'launchScaleAggregatorOnStart': "true",

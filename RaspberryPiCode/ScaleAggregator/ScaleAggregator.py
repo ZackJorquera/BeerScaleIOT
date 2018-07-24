@@ -52,6 +52,9 @@ if ScaleDataDB.Client != None:
     printAndLog("Outputting to " + CfgRW.cfgVars["dbToUse"] + " database " + ScaleDataDB.DBName + " at: " + str(ScaleDataDB.Client.address), logging.INFO)
 
 while True:
+    if CfgRW.cfgVars["uselatestFromMongoAsCurrent"].upper() == "TRUE":
+        break
+
     timeOfLastUpdate = time.time()
 
     if scaleInfoList is None or loopOn > loopsOfPersists or len(scaleInfoList) != ScaleIRW.GetNumOfScales():

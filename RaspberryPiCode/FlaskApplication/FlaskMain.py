@@ -23,8 +23,7 @@ logDir = "../Log"
 logFile = "Log.txt"
 
 ScaleDataDB = None
-reconnecting = False
-lock = threading.Lock()
+reconnectLock = threading.Lock()
 
 
 def LoadDB():
@@ -38,9 +37,10 @@ def LoadDB():
 
 
 def Reconnect():
-    lock.acquire()
-    ScaleDataDB.Reconnect()
-    lock.release()
+    if not reconnectLock.locked():
+        reconnectLock.acquire()
+        ScaleDataDB.Reconnect()
+        reconnectLock.release()
 
 
 ScaleDataDB = LoadDB()
@@ -74,10 +74,25 @@ def home():
         if i*2+1 < numOfScales:
             scale2 = ScaleIRW.ScaleInfo(i*2+2)
             scale2.startGPIO()
-            horizontalAlignments.append(GraphCreater.CombineFigs('h', GraphCreater.CreateGauge(scale1.GetValue(), scale1),
-                                                                      GraphCreater.CreateGauge(scale2.GetValue(), scale2)))
+            if CfgRW.cfgVars["uselatestFromMongoAsCurrent"].upper() == "TRUE":
+                value1 = ScaleDataDB.GetLatestSample(scale1)
+                value2 = ScaleDataDB.GetLatestSample(scale2)
+            else:
+                value1 = scale1.GetValue()
+                value2 = scale2.GetValue()
+
+            horizontalAlignments.append(GraphCreater.CombineFigs('h', GraphCreater.CreateGauge(value1, scale1),
+                                                                      GraphCreater.CreateGauge(value2, scale2)))
         else:
-            horizontalAlignments.append(GraphCreater.CreateGauge(scale1.GetValue(), scale1))
+            if CfgRW.cfgVars["uselatestFromMongoAsCurrent"].upper() == "TRUE":
+                value1 = ScaleDataDB.GetLatestSample(scale1)
+            else:
+                value1 = scale1.GetValue()
+            horizontalAlignments.append(GraphCreater.CreateGauge(value1, scale1))
+
+        if value1 == -1:
+            t = threading.Thread(target=Reconnect)
+            t.start()
 
     script, div = GraphCreater.GetComponentsFromFig(GraphCreater.CombineFigs('v', horizontalAlignments))
 
@@ -146,7 +161,10 @@ def CreateScaleGraphFromTimeFrame(num, hours=730):
 
     if not ki.Failed:
         ki.startGPIO()
-        value = ki.GetValue()
+        if CfgRW.cfgVars["uselatestFromMongoAsCurrent"].upper() == "TRUE":
+            value = ScaleDataDB.GetLatestSample(ki)
+        else:
+            value = ki.GetValue()
     else:
         if failMsg == "None":
             failMsg = "An error occurred while loading scale info."
@@ -344,6 +362,7 @@ def changeSettings():
         currentSimulateData = CfgRW.cfgVars["simulateData"]
         currentUseCQuickPulse = CfgRW.cfgVars["useCQuickPulse"]
         currentUseMedianOfData = CfgRW.cfgVars["useMedianOfData"]
+        currentUselatestFromMongoAsCurrent = CfgRW.cfgVars["uselatestFromMongoAsCurrent"]
         currentLoadSamplesPerRead = CfgRW.cfgVars["loadSamplesPerRead"]
 
         currentLaunchScaleAggregatorOnStart = CfgRW.cfgVars["launchScaleAggregatorOnStart"]
@@ -368,7 +387,7 @@ def changeSettings():
                                currentUseMedianOfData=currentUseMedianOfData, currentAggregatorSecsPerPersist=currentAggregatorSecsPerPersist, currentAggregatorLoopsOfPersists=currentAggregatorLoopsOfPersists,
                                currentAggregatorPrintPushes=currentAggregatorPrintPushes, currentDBHostServer=currentDBHostServer, currentDBHostPort=currentDBHostPort, currentDBName=currentDBName,
                                currentDBCollectionName=currentDBCollectionName, num=ScaleIRW.GetNumOfScales(), didFail=didFail, failMsg=failMsg, currentLaunchScaleAggregatorOnStart=currentLaunchScaleAggregatorOnStart,
-                               currentLoadSamplesPerRead=currentLoadSamplesPerRead)
+                               currentLoadSamplesPerRead=currentLoadSamplesPerRead, currentUselatestFromMongoAsCurrent=currentUselatestFromMongoAsCurrent)
     elif request.method == 'POST':
         try:
             int(request.form['aggregatorSecsPerPersist'])
@@ -381,6 +400,7 @@ def changeSettings():
         CfgRW.cfgVars["simulateData"] = request.form['simulateData']
         CfgRW.cfgVars["useCQuickPulse"] = request.form['useCQuickPulse']
         CfgRW.cfgVars["useMedianOfData"] = request.form['useMedianOfData']
+        CfgRW.cfgVars["uselatestFromMongoAsCurrent"] = request.form['uselatestFromMongoAsCurrent']
         CfgRW.cfgVars["loadSamplesPerRead"] = request.form['loadSamplesPerRead']
         CfgRW.cfgVars["launchScaleAggregatorOnStart"] = request.form['launchScaleAggregatorOnStart']
         CfgRW.cfgVars["aggregatorSecsPerPersist"] = request.form['aggregatorSecsPerPersist']

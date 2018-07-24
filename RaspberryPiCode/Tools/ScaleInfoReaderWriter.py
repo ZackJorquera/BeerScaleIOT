@@ -49,7 +49,8 @@ class ScaleInfo:
             self.FullValue = 100
 
     def startGPIO(self):
-        if CfgRW.cfgVars["simulateData"].upper() != "TRUE":
+        if CfgRW.cfgVars["simulateData"].upper() != "TRUE" and \
+                CfgRW.cfgVars["uselatestFromMongoAsCurrent"].upper() != "TRUE":
             GPIO.setup(self.ClockPin, GPIO.OUT)
             GPIO.setup(self.DataPin, GPIO.IN)
 
