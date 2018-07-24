@@ -98,12 +98,14 @@ def homePost():
         os.system('sudo reboot')
     if request.form["submit"] == "Start ScaleAggregator":
         os.system("(cd ../ScaleAggregator/; python ScaleAggregator.py &)")
+        return redirect(url_for('home'))
     if request.form["submit"] == "Stop ScaleAggregator":
         try:
             PID = GetPIDOfScaleAggregator()
             os.system("sudo kill " + PID)
         except:
             pass
+        return redirect(url_for('home'))
     if request.form["submit"] == "Download Log File":
         try:
             return send_from_directory(logDir, logFile, as_attachment=True)
