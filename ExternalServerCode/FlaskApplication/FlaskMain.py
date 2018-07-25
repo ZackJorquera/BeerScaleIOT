@@ -3,7 +3,6 @@
 import math
 import threading
 import os
-import subprocess
 import time
 import datetime
 import sys
@@ -70,24 +69,16 @@ def home():
     horizontalAlignments = list()
     for i in range(int(math.ceil(numOfScales/2.0))):
         scale1 = ScaleIRW.ScaleInfo(i*2+1)
-        scale1.startGPIO()
         if i*2+1 < numOfScales:
             scale2 = ScaleIRW.ScaleInfo(i*2+2)
-            scale2.startGPIO()
-            if CfgRW.cfgVars["uselatestFromMongoAsCurrent"].upper() == "TRUE":
-                value1 = ScaleDataDB.GetLatestSample(scale1)
-                value2 = ScaleDataDB.GetLatestSample(scale2)
-            else:
-                value1 = scale1.GetValue()
-                value2 = scale2.GetValue()
+            value1 = ScaleDataDB.GetLatestSample(scale1)
+            value2 = ScaleDataDB.GetLatestSample(scale2)
 
             horizontalAlignments.append(GraphCreater.CombineFigs('h', GraphCreater.CreateGauge(value1, scale1),
                                                                       GraphCreater.CreateGauge(value2, scale2)))
         else:
-            if CfgRW.cfgVars["uselatestFromMongoAsCurrent"].upper() == "TRUE":
-                value1 = ScaleDataDB.GetLatestSample(scale1)
-            else:
-                value1 = scale1.GetValue()
+            value1 = ScaleDataDB.GetLatestSample(scale1)
+
             horizontalAlignments.append(GraphCreater.CreateGauge(value1, scale1))
 
         if value1 == -1:
@@ -96,31 +87,11 @@ def home():
 
     script, div = GraphCreater.GetComponentsFromFig(GraphCreater.CombineFigs('v', horizontalAlignments))
 
-    scaleAggregatorPID = GetPIDOfScaleAggregator()
-    scaleAggregatorIsRunning = False
-    try:
-        if scaleAggregatorPID != None:
-            scaleAggregatorIsRunning = os.path.exists("/proc/" + scaleAggregatorPID)
-    except:
-        scaleAggregatorIsRunning = False
-
     return render_template("HomePage.html", num=numOfScales, plot_script=script, plot_div=div, js_resources=js_resources, css_resources=css_resources,
-                           scaleAggregatorIsRunning=scaleAggregatorIsRunning, didFail=didFail, failMsg=failMsg)
+                           didFail=didFail, failMsg=failMsg)
 
 @app.route('/Home', methods=['POST'])
 def homePost():
-    if request.form["submit"] == "Restart Pi":
-        os.system('sudo reboot')
-    if request.form["submit"] == "Start ScaleAggregator":
-        os.system("(cd ../ScaleAggregator/; python ScaleAggregator.py &)")
-        return redirect(url_for('home'))
-    if request.form["submit"] == "Stop ScaleAggregator":
-        try:
-            PID = GetPIDOfScaleAggregator()
-            os.system("sudo kill " + PID)
-        except:
-            pass
-        return redirect(url_for('home'))
     if request.form["submit"] == "Download Log File":
         try:
             return send_from_directory(logDir, logFile, as_attachment=True)
@@ -137,23 +108,6 @@ def homePost():
             session['failMsg'] = "An error occurred while trying to delete the log file. Close all other programs that log to the log file and try again."
         app.logger.addHandler(createHandler())
         return redirect(url_for('home'))
-    if request.form["submit"] == "Download Scale Info File":
-        try:
-            return send_from_directory("../", "ScaleInfoFile.SIF", as_attachment=True)
-        except Exception as error:
-            app.logger.error("An error occurred while trying to download the Scale Info File. Exception: " + str(error))
-            session['failMsg'] = "An error occurred while trying to download the Scale Info File."
-            return redirect(url_for('home'))
-
-
-def GetPIDOfScaleAggregator():
-    try:
-        output = subprocess.check_output("ps ax | grep ScaleAggregator.py", shell=True)
-        output = output.strip()
-        PID = output.split(' ')[0]
-        return PID
-    except:
-        return None
 
 
 def CreateScaleGraphFromTimeFrame(num, hours=730):
@@ -167,15 +121,11 @@ def CreateScaleGraphFromTimeFrame(num, hours=730):
         didFail = "True"
 
     if not ki.Failed:
-        ki.startGPIO()
-        if CfgRW.cfgVars["uselatestFromMongoAsCurrent"].upper() == "TRUE":
             value = ScaleDataDB.GetLatestSample(ki)
-        else:
-            value = ki.GetValue()
     else:
         if failMsg == "None":
             failMsg = "An error occurred while loading scale info."
-        value = 0
+        value = -1
         didFail = "True"
 
     totalScales = ScaleIRW.GetNumOfScales()
@@ -262,10 +212,6 @@ def getScale(num):
     elif request.method == 'POST':
         if request.form['_action'] == "Export":
             return ExportScaleGraphFromTimeFrame(num)
-        elif request.form['_action'] == 'DELETE':
-            ki = ScaleIRW.ScaleInfo(num)
-            ki.Delete()
-            return redirect(url_for('home'))
         elif request.form['_action'] == 'ShowLastDay':
             return redirect(url_for('getScaleWithTimeFrame', num=num, hours=24))
         elif request.form['_action'] == 'ShowLastWeek':
@@ -289,10 +235,6 @@ def getScaleWithTimeFrame(num, hours):
     elif request.method == 'POST':
         if request.form['_action'] == "Export":
             return ExportScaleGraphFromTimeFrame(num, hours)
-        elif request.form['_action'] == 'DELETE':
-            ki = ScaleIRW.ScaleInfo(num)
-            ki.Delete()
-            return redirect(url_for('home'))
         elif request.form['_action'] == 'ShowLastDay':
             return redirect(url_for('getScaleWithTimeFrame', num=num, hours=24))
         elif request.form['_action'] == 'ShowLastWeek':
@@ -309,75 +251,12 @@ def getScaleWithTimeFrame(num, hours):
             return redirect(url_for('getScale', num=num))
 
 
-@app.route('/AddScale')
-def addScale():
-    if 'failMsg' not in session:
-        didFail = "False"
-        failMsg = "None"
-    else:
-        didFail = "True"
-        failMsg = session.pop('failMsg', None)
-    num = ScaleIRW.GetNumOfScales()
-    return render_template("AddScale.html", num=num, didFail=didFail, failMsg=failMsg)
-
-
-@app.route('/AddScale<int:num>/Range', methods=['GET', 'POST'])
-def setScaleRange(num):
-    totalNum = ScaleIRW.GetNumOfScales()
-    s = ScaleIRW.ScaleInfo(num)
-    if request.method == 'GET':
-        return render_template("SetRange.html", totalNum=totalNum, num=num, lr=s.EmptyValue, ur=s.FullValue)
-    elif request.method == 'POST':
-        s.startGPIO()
-        if request.form['submit'] == 'Get Empty Value':
-            s.GetLowerRange()
-            s.SetRange(s.EmptyValue, request.form['FullValue'])
-            return redirect(url_for('setScaleRange', num=num))
-        elif request.form['submit'] == 'Get Full Value':
-            s.GetUpperRange()
-            s.SetRange(request.form['EmptyValue'], s.FullValue)
-            return redirect(url_for('setScaleRange', num=num))
-        elif request.form['submit'] == 'Set':
-            s.SetRange(request.form['EmptyValue'], request.form['FullValue'])
-            return redirect(url_for('getScale', num=num))
-
-
-@app.route('/AddScale', methods=['POST'])
-def addScalePost():
-    Type = request.form['Type']
-    Name = request.form['Name']
-    MaxCapacity = request.form['MaxCapacity']
-    Units = request.form['Units']
-    DataPin = request.form['DataPin']
-    ClockPin = request.form['ClockPin']
-
-    oldNumOfScales = ScaleIRW.GetNumOfScales()
-
-    num = ScaleIRW.AddScaleInfoToFile(Type, Name, MaxCapacity, Units, DataPin, ClockPin)
-    if oldNumOfScales == ScaleIRW.GetNumOfScales():
-        session['failMsg'] = "An error occurred while processing your input."
-        return redirect(url_for('addScale'))
-    return redirect(url_for('setScaleRange', num=num))
-
-
 @app.route('/Settings', methods=['GET','POST'])
 def changeSettings():
     totalNum = ScaleIRW.GetNumOfScales()
 
     if request.method == 'GET':
         currentDBToUse = CfgRW.cfgVars["dbToUse"]
-        currentSimulateData = CfgRW.cfgVars["simulateData"]
-        currentUseCQuickPulse = CfgRW.cfgVars["useCQuickPulse"]
-        currentUseMedianOfData = CfgRW.cfgVars["useMedianOfData"]
-        currentUselatestFromMongoAsCurrent = CfgRW.cfgVars["uselatestFromMongoAsCurrent"]
-        currentLoadSamplesPerRead = CfgRW.cfgVars["loadSamplesPerRead"]
-
-        currentLaunchScaleAggregatorOnStart = CfgRW.cfgVars["launchScaleAggregatorOnStart"]
-
-        currentAggregatorSecsPerPersist = CfgRW.cfgVars["aggregatorSecsPerPersist"]
-        currentAggregatorLoopsOfPersists = CfgRW.cfgVars["aggregatorLoopsOfPersists"]
-        currentAggregatorPrintPushes = CfgRW.cfgVars["aggregatorPrintPushes"]
-
         currentDBHostServer = CfgRW.cfgVars["dbHostServer"]
         currentDBHostPort = CfgRW.cfgVars["dbHostPort"]
         currentDBName = CfgRW.cfgVars["dbName"]
@@ -390,30 +269,16 @@ def changeSettings():
             didFail = "True"
             failMsg = session.pop('failMsg', None)
 
-        return render_template("ChangeSettingPage.html", totalNum=totalNum, currentDBToUse=currentDBToUse, currentSimulateData=currentSimulateData, currentUseCQuickPulse=currentUseCQuickPulse,
-                               currentUseMedianOfData=currentUseMedianOfData, currentAggregatorSecsPerPersist=currentAggregatorSecsPerPersist, currentAggregatorLoopsOfPersists=currentAggregatorLoopsOfPersists,
-                               currentAggregatorPrintPushes=currentAggregatorPrintPushes, currentDBHostServer=currentDBHostServer, currentDBHostPort=currentDBHostPort, currentDBName=currentDBName,
-                               currentDBCollectionName=currentDBCollectionName, num=ScaleIRW.GetNumOfScales(), didFail=didFail, failMsg=failMsg, currentLaunchScaleAggregatorOnStart=currentLaunchScaleAggregatorOnStart,
-                               currentLoadSamplesPerRead=currentLoadSamplesPerRead, currentUselatestFromMongoAsCurrent=currentUselatestFromMongoAsCurrent)
+        return render_template("ChangeSettingPage.html", totalNum=totalNum, currentDBToUse=currentDBToUse, currentDBHostServer=currentDBHostServer,
+                               currentDBHostPort=currentDBHostPort, currentDBName=currentDBName, currentDBCollectionName=currentDBCollectionName,
+                               num=ScaleIRW.GetNumOfScales(), didFail=didFail, failMsg=failMsg)
     elif request.method == 'POST':
         try:
-            int(request.form['aggregatorSecsPerPersist'])
-            int(request.form['aggregatorLoopsOfPersists'])
-            int(request.form['loadSamplesPerRead'])
             int(request.form['dbHostPort'])
         except:
             session['failMsg'] = "An error occurred while processing your input."
             return redirect(url_for('changeSettings'))
         CfgRW.cfgVars["dbToUse"] = request.form['dbToUse']
-        CfgRW.cfgVars["simulateData"] = request.form['simulateData']
-        CfgRW.cfgVars["useCQuickPulse"] = request.form['useCQuickPulse']
-        CfgRW.cfgVars["useMedianOfData"] = request.form['useMedianOfData']
-        CfgRW.cfgVars["uselatestFromMongoAsCurrent"] = request.form['uselatestFromMongoAsCurrent']
-        CfgRW.cfgVars["loadSamplesPerRead"] = request.form['loadSamplesPerRead']
-        CfgRW.cfgVars["launchScaleAggregatorOnStart"] = request.form['launchScaleAggregatorOnStart']
-        CfgRW.cfgVars["aggregatorSecsPerPersist"] = request.form['aggregatorSecsPerPersist']
-        CfgRW.cfgVars["aggregatorLoopsOfPersists"] = request.form['aggregatorLoopsOfPersists']
-        CfgRW.cfgVars["aggregatorPrintPushes"] = request.form['aggregatorPrintPushes']
         CfgRW.cfgVars["dbHostServer"] = request.form['dbHostServer']
         CfgRW.cfgVars["dbHostPort"] = request.form['dbHostPort']
         CfgRW.cfgVars["dbName"] = request.form['dbName']
@@ -421,8 +286,6 @@ def changeSettings():
 
         CfgRW.CreateNewCFGFile()
 
-        if request.form["submit"] == "Set and Restart":
-            os.system('sudo reboot')
         return redirect(url_for('home'))
 
 
@@ -448,9 +311,6 @@ def createHandler():
 
 
 if __name__ == "__main__":
-    if CfgRW.cfgVars["launchScaleAggregatorOnStart"].upper() == "TRUE":
-        os.system("(cd ../ScaleAggregator/; python ScaleAggregator.py &)")
-
     if not app.debug:
         if not os.path.exists(logDir):
             os.makedirs(logDir)

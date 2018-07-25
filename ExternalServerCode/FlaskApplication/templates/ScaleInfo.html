@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>Scale Info {{ num }}</title>
+	{{ js_resources|indent(4)|safe }}
+	{{ css_resources|indent(4)|safe }}
+	{{ plot_script|indent(4)|safe }}
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% if didFail == "True" %}
+	<div id="banner">
+		<p id="bannerText">{{ failMsg }}</p>
+    	<div id="close" onclick="myFunction()">&times;</div>
+	</div>
+
+	<script>
+		function myFunction() {
+			var x = document.getElementById("banner");
+			x.style.display = "none";
+		}
+	</script>
+{% endif %}
+
+<div id="container">
+	<div id="intro">
+		<div id="pageHeaderTwo">
+			<h1><span>Scale Info {{ num }}</span></h1>
+		</div>
+
+		<div id="preamble">
+			<h2><span>Scale Info</span></h2>
+			<p> <b>Type:</b> {{ type }}<br />
+				<b>Name:</b> {{ name }}<br /> </p>
+			<p> {{ plot_div|indent(4)|safe }} </p>
+
+			<p>
+				<form method="POST">
+					<p><input type="hidden" name="_action" value="ShowDefault" />
+						<input type="submit" value="Show Default" /></p>
+				</form>
+				<form method="POST">
+					<p><input type="hidden" name="_action" value="ShowLastDay" />
+						<input type="submit" value="Show Last Day" /></p>
+				</form>
+				<form method="POST">
+					<p><input type="hidden" name="_action" value="ShowLastWeek" />
+						<input type="submit" value="Show Last Week" /></p>
+				</form>
+				<form method="POST">
+					<p>Hours ago: <input name="HoursAgo"><br />
+						<input type="hidden" name="_action" value="ShowHoursAgo" />
+						<input type="submit" value="Show From Hours Ago" /></p>
+				</form>
+
+				<form method="POST">
+					<p><input type="hidden" name="_action" value="Export" />
+						<input type="submit" value="Export Time Frame" /></p>
+				</form>
+			</p>
+		</div>
+	</div>
+
+	<div id="linkList">
+		<div id="linkList2">
+			<div id="lselect">
+				<ul>
+					<li><a href="/Home">Home</a></li>
+					<li><a href="/Settings">Settings</a></li>
+					<li><a href="https://github.com/ZackJorquera/ScaleLiquidRemainingIOT">GitHub</a></li>
+				</ul>
+			</div>
+
+			<div id="larchives">
+				<ul>
+					{% for i in range(1,totalNum+1) %}
+						{% if num == i %}
+							<li><a href="/ScaleInfo={{ i }}">*Scale {{ i }}</a></li>
+						{% else %}
+							<li><a href="/ScaleInfo={{ i }}">Scale {{ i }}</a></li>
+						{% endif %}
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>

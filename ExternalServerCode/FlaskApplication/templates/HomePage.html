@@ -41,13 +41,7 @@
 
 			<h2>Quick Actions</h2>
 			<form method="POST">
-				<input type="submit" name="submit" value="Restart Pi"><br />
                 <input type="submit" name="submit" value="Download Scale Info File"><br />
-				{% if scaleAggregatorIsRunning %}
-					<input type="submit" name="submit" value="Stop ScaleAggregator"><br />
-				{% else %}
-					<input type="submit" name="submit" value="Start ScaleAggregator"><br />
-				{% endif %}
 				<input type="submit" name="submit" value="Download Log File"><br />
 				<input type="submit" name="submit" value="Delete Log File"><br />
 			</form>
@@ -69,7 +63,6 @@
 					{% for i in range(1,num+1) %}
                         <li><a href="/ScaleInfo={{ i }}">Scale {{ i }}</a></li>
                     {% endfor %}
-					<li><a href="/AddScale">Add a Scale</a></li>
 				</ul>
 			</div>
 		</div>

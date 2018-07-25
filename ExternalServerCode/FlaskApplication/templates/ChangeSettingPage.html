@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+	<title>Settings</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% if didFail == "True" %}
+	<div id="banner">
+		<p id="bannerText">{{ failMsg }}</p>
+    	<div id="close" onclick="myFunction()">&times;</div>
+	</div>
+
+	<script>
+		function myFunction() {
+			var x = document.getElementById("banner");
+			x.style.display = "none";
+		}
+	</script>
+{% endif %}
+
+<div id="container">
+	<div id="intro">
+		<div id="pageHeaderTwo">
+			<h1><span>Change Settings</span></h1>
+		</div>
+
+		<div id="preamble">
+            <form method="POST">
+                <h2><span>Settings</span></h2>
+                <p> Database To Use: <input name="dbToUse", value="{{  currentDBToUse  }}"><br />
+                    Database Host Server: <input name="dbHostServer", value="{{  currentDBHostServer  }}"><br />
+                    Database Host Port: <input name="dbHostPort", value="{{  currentDBHostPort  }}"><br />
+                    Database Name: <input name="dbName", value="{{  currentDBName  }}"><br />
+                    Database Collection Name: <input name="dbCollectionName", value="{{  currentDBCollectionName  }}"><br /><br />
+
+				<input type="submit" name="submit" value="Set">
+            </form>
+		</div>
+	</div>
+
+	<div id="linkList">
+		<div id="linkList2">
+			<div id="lselect">
+				<ul>
+					<li><a href="/Home">Home</a></li>
+					<li><a href="/Settings">Settings</a></li>
+					<li><a href="https://github.com/ZackJorquera/ScaleLiquidRemainingIOT">GitHub</a></li>
+				</ul>
+			</div>
+
+			<div id="larchives">
+				<ul>
+					{% for i in range(1,num+1) %}
+                        <li><a href="/ScaleInfo={{ i }}">Scale {{ i }}</a></li>
+                    {% endfor %}
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>
