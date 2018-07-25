@@ -33,10 +33,10 @@ def createLogger():
     file_handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(levelname)s\t%(asctime)s \t%(message)s')
     file_handler.setFormatter(formatter)
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(file_handler)
-    return logger
+    tmplogger = logging.getLogger()
+    tmplogger.setLevel(logging.DEBUG)
+    tmplogger.addHandler(file_handler)
+    return tmplogger
 
 
 ScaleDataDB = LoadDB()
